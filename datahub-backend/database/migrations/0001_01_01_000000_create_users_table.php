@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB; // Pastikan ini di-import
 
 return new class extends Migration
 {
@@ -11,12 +12,20 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Buat tipe ENUM 'role_enum' untuk PostgreSQL
+        // DB::statement("DROP TYPE IF EXISTS role_enum CASCADE"); // Baris ini untuk testing jika ada error
+        DB::statement("CREATE TYPE role_enum AS ENUM ('admin', 'participant')");
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            
+            // Menggunakan tipe data 'role_enum' yang baru dibuat
+            $table->rawColumn('role', 'role_enum')->default('participant');
+            
             $table->rememberToken();
             $table->timestamps();
         });
@@ -42,8 +51,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
+
+        // Hapus tipe ENUM saat rollback
+        DB::statement("DROP TYPE IF EXISTS role_enum");
     }
 };

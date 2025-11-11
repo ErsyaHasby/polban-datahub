@@ -6,6 +6,10 @@
       </div>
 
       <form @submit.prevent="login" class="login-form">
+        <div v-if="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+
         <div class="form-group">
           <label for="email">Email</label>
           <input
@@ -41,7 +45,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { useAuthStore } from '../stores/auth'
 
 export default {
   name: 'Login',
@@ -50,23 +54,27 @@ export default {
       email: '',
       password: '',
       loading: false,
+      errorMessage: '',
     }
   },
   methods: {
     async login() {
       this.loading = true
+      this.errorMessage = ''
+      
       try {
-        const res = await axios.post('/api/login', {
-          email: this.email,
-          password: this.password
-        })
-        console.log('Login berhasil:', res.data)
-        alert('Login berhasil!')
-        // Arahkan pengguna ke halaman dashboard atau halaman lain setelah login berhasil
+        const authStore = useAuthStore()
+        const result = await authStore.login(this.email, this.password)
+        
+        if (result.success) {
+          // Redirect to dashboard
+          this.$router.push({ name: 'dashboard' })
+        } else {
+          this.errorMessage = result.message
+        }
       } catch (err) {
-        console.error('Login error:', err);
-        const errorMessage = err.response?.data?.message || 'Login gagal! Periksa kembali email dan kata sandi Anda.';
-        alert(errorMessage);
+        console.error('Login error:', err)
+        this.errorMessage = 'Terjadi kesalahan. Silakan coba lagi.'
       } finally {
         this.loading = false
       }
@@ -133,6 +141,16 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.error-message {
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  text-align: left;
 }
 
 .form-group {
