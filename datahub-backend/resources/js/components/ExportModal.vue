@@ -85,25 +85,53 @@ export default {
         if (this.filters.kelas) params.kelas = this.filters.kelas
         if (this.filters.tahun) params.tahun = this.filters.tahun
 
-        const response = await axios.get('/export-data', {
-          params,
+        // Create URL with params
+        const queryString = new URLSearchParams(params).toString()
+        const url = `/export-data${queryString ? '?' + queryString : ''}`
+        
+        // Download file using fetch with blob
+        const response = await fetch(`${axios.defaults.baseURL}${url}`, {
+          method: 'GET',
           headers: {
-            'Authorization': `Bearer ${this.authStore.token}`
+            'Authorization': `Bearer ${this.authStore.token}`,
+            'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
           }
         })
 
-        this.successMessage = `Export berhasil! Total ${response.data.total_records} records.`
-        
-        // For now, we just show the data
-        // TODO: Implement actual file download
-        console.log('Export data:', response.data.data)
+        if (!response.ok) {
+          throw new Error('Export failed')
+        }
 
+        // Get filename from Content-Disposition header or use default
+        const contentDisposition = response.headers.get('Content-Disposition')
+        let filename = 'mahasiswa_export.xlsx'
+        if (contentDisposition) {
+          const matches = /filename="([^"]+)"/.exec(contentDisposition)
+          if (matches && matches[1]) {
+            filename = matches[1]
+          }
+        }
+
+        // Create blob and download
+        const blob = await response.blob()
+        const downloadUrl = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = downloadUrl
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(downloadUrl)
+
+        this.successMessage = 'Export berhasil! File sedang diunduh...'
+        
         setTimeout(() => {
           this.$emit('close')
         }, 2000)
 
       } catch (error) {
-        this.errorMessage = error.response?.data?.message || 'Export gagal. Silakan coba lagi.'
+        console.error('Export error:', error)
+        this.errorMessage = 'Export gagal. Silakan coba lagi.'
       } finally {
         this.exporting = false
       }

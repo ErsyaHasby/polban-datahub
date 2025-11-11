@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Mahasiswa;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class ExportController extends Controller
 {
@@ -87,16 +92,69 @@ class ExportController extends Controller
                 $request
             );
 
-            // Return JSON for now (nanti bisa diganti dengan Excel/CSV download)
-            return response()->json([
-                'message' => 'Data exported successfully',
-                'total_records' => $data->count(),
-                'data' => $exportData,
-            ], 200);
+            // Create Excel file
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
 
-            // TODO: Implementasi download file Excel/CSV menggunakan maatwebsite/excel
-            // return Excel::download(new MahasiswaExport($exportData), 'mahasiswa.xlsx');
+            // Set header
+            $headers = [
+                'ID',
+                'Kelas',
+                'Angkatan',
+                'Tanggal Lahir',
+                'Jenis Kelamin',
+                'Agama',
+                'Kode Pos',
+                'SLTA',
+                'Jalur Daftar',
+                'Kabupaten/Kota',
+                'Provinsi',
+                'Importer',
+                'Approver',
+                'Created At'
+            ];
 
+            $sheet->fromArray([$headers], null, 'A1');
+
+            // Style header
+            $headerRange = 'A1:N1';
+            $sheet->getStyle($headerRange)->applyFromArray([
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '4472C4']
+                ],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                'borders' => [
+                    'allBorders' => ['borderStyle' => Border::BORDER_THIN]
+                ]
+            ]);
+
+            // Add data rows
+            $rowNumber = 2;
+            foreach ($exportData as $row) {
+                $sheet->fromArray([array_values($row)], null, 'A' . $rowNumber);
+                $rowNumber++;
+            }
+
+            // Auto-size columns
+            foreach (range('A', 'N') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            // Generate filename
+            $filename = 'mahasiswa_export_' . date('YmdHis') . '.xlsx';
+
+            // Create writer and download
+            $writer = new Xlsx($spreadsheet);
+
+            // Set headers for download
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+
+            $writer->save('php://output');
+            exit;
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Export failed',

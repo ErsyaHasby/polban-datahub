@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', {
 
                 // Save token to localStorage
                 localStorage.setItem('token', response.data.token)
-                
+
                 // Set default axios header
                 axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
 
@@ -42,14 +42,14 @@ export const useAuthStore = defineStore('auth', {
 
         async logout() {
             const tokenToUse = this.token
-            
+
             // Clear state and localStorage FIRST
             this.user = null
             this.token = null
             this.isLoggedIn = false
             localStorage.removeItem('token')
             delete axios.defaults.headers.common['Authorization']
-            
+
             // Then call logout API (in background, don't wait)
             if (tokenToUse) {
                 try {

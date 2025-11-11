@@ -1,0 +1,14 @@
+# Laravel
+/datahub-backend/.env
+/datahub-backend/env
+/datahub-backend/vendor
+/datahub-backend/node_modules
+/datahub-backend/public/hot
+/datahub-backend/public/storage
+/datahub-backend/storage/*.key
+/datahub-backend/.env.backup
+/datahub-backend/.phpunit.result.cache
+
+# OS
+.DS_Store
+Thumbs.db

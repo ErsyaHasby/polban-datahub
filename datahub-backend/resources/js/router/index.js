@@ -7,27 +7,27 @@ import AdminLogs from '../pages/AdminLogs.vue'
 import NotFound from '../pages/NotFound.vue'
 
 const routes = [
-    { 
-        path: '/login', 
-        name: 'login', 
+    {
+        path: '/login',
+        name: 'login',
         component: Login,
         meta: { guest: true }
     },
-    { 
-        path: '/', 
-        name: 'dashboard', 
+    {
+        path: '/',
+        name: 'dashboard',
         component: Dashboard,
         meta: { requiresAuth: true }
     },
-    { 
-        path: '/admin/review', 
-        name: 'admin-review', 
+    {
+        path: '/admin/review',
+        name: 'admin-review',
         component: AdminReview,
         meta: { requiresAuth: true, role: 'admin' }
     },
-    { 
-        path: '/admin/logs', 
-        name: 'admin-logs', 
+    {
+        path: '/admin/logs',
+        name: 'admin-logs',
         component: AdminLogs,
         meta: { requiresAuth: true, role: 'admin' }
     },
@@ -46,7 +46,7 @@ const router = createRouter({
 // Navigation Guard
 router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore()
-    
+
     // Initialize auth on first load (wait for it to complete)
     if (!authStore.user && authStore.token) {
         await authStore.fetchUser()

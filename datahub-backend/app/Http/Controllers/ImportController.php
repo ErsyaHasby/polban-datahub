@@ -36,27 +36,27 @@ class ImportController extends Controller
         try {
             $file = $request->file('file');
             $extension = $file->getClientOriginalExtension();
-            
+
             $rowCount = 0;
             $errors = [];
-            
+
             if (in_array($extension, ['csv', 'txt'])) {
                 $handle = fopen($file->getRealPath(), 'r');
-                
+
                 $header = fgetcsv($handle);
                 if (!$header) {
                     throw new \Exception('File CSV kosong');
                 }
-                
+
                 $lineNumber = 1;
-                
+
                 while (($row = fgetcsv($handle)) !== false) {
                     $lineNumber++;
-                    
+
                     if (empty(array_filter($row))) {
                         continue;
                     }
-                    
+
                     try {
                         ImportMahasiswa::create([
                             'user_id' => auth()->id(),
@@ -77,30 +77,30 @@ class ImportController extends Controller
                         $errors[] = "Baris {$lineNumber}: " . $e->getMessage();
                     }
                 }
-                
+
                 fclose($handle);
             } elseif (in_array($extension, ['xlsx', 'xls'])) {
                 $spreadsheet = IOFactory::load($file->getRealPath());
                 $worksheet = $spreadsheet->getActiveSheet();
                 $rows = $worksheet->toArray();
-                
+
                 if (empty($rows)) {
                     throw new \Exception('File Excel kosong');
                 }
-                
+
                 // Skip header row
                 array_shift($rows);
-                
+
                 $lineNumber = 1;
-                
+
                 foreach ($rows as $row) {
                     $lineNumber++;
-                    
+
                     // Skip empty rows
                     if (empty(array_filter($row))) {
                         continue;
                     }
-                    
+
                     try {
                         ImportMahasiswa::create([
                             'user_id' => auth()->id(),
@@ -136,13 +136,12 @@ class ImportController extends Controller
                 'message' => 'Data imported successfully',
                 'rows_imported' => $rowCount,
             ];
-            
+
             if (!empty($errors)) {
                 $response['errors'] = array_slice($errors, 0, 10);
             }
 
             return response()->json($response, 201);
-
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Import failed',
