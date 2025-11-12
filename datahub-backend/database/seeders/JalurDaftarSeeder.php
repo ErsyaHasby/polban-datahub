@@ -25,8 +25,6 @@ class JalurDaftarSeeder extends Seeder
         foreach ($jalurDaftars as $jalur) {
             DB::table('jalur_daftar')->insert([
                 'nama_jalur_daftar' => $jalur,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
         }
     }

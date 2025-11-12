@@ -37,14 +37,12 @@ return new class extends Migration
         Schema::create('slta', function (Blueprint $table) {
             $table->id('slta_id');
             $table->string('nama_slta_resmi', 100)->unique();
-            $table->timestamps();
         });
 
         // Tabel Master/Lookup Jalur Daftar
         Schema::create('jalur_daftar', function (Blueprint $table) {
             $table->id('jalurdaftar_id');
             $table->string('nama_jalur_daftar', 20)->unique();
-            $table->timestamps();
         });
 
         // Tabel Master/Lookup Provinsi
@@ -53,7 +51,6 @@ return new class extends Migration
             $table->string('nama_provinsi', 100)->unique();
             $table->double('latitude')->nullable();
             $table->double('longitude')->nullable();
-            $table->timestamps();
         });
 
         // Tabel Master/Lookup Wilayah (Kabupaten/Kota)
@@ -63,7 +60,6 @@ return new class extends Migration
             $table->string('nama_wilayah', 100);
             $table->double('latitude');
             $table->double('longitude');
-            $table->timestamps();
 
             $table->unique(['provinsi_id', 'nama_wilayah']); // Kombinasi harus unik
         });
@@ -71,7 +67,7 @@ return new class extends Migration
         // Tabel Staging untuk impor data
         Schema::create('import_mahasiswa', function (Blueprint $table) {
             $table->id('import_id');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
             $table->rawColumn('status', 'import_status_enum')->default('pending');
 
             // Data mentah (semua nullable)
@@ -87,7 +83,6 @@ return new class extends Migration
             $table->string('provinsi_raw', 255)->nullable(); // Provinsi
             $table->text('admin_notes')->nullable();
 
-            $table->timestamps();
             $table->index('status');
         });
 
@@ -97,8 +92,8 @@ return new class extends Migration
 
             // Kolom pelacakan (WAJIB)
             $table->foreignId('import_id')->constrained('import_mahasiswa', 'import_id')->onDelete('restrict');
-            $table->foreignId('user_id_importer')->constrained('users')->onDelete('restrict');
-            $table->foreignId('user_id_approver')->constrained('users')->onDelete('restrict');
+            $table->foreignId('user_id_importer')->constrained('users', 'user_id')->onDelete('restrict');
+            $table->foreignId('user_id_approver')->constrained('users', 'user_id')->onDelete('restrict');
 
             // Data (NULLABLE)
             $table->string('kelas', 2)->nullable();

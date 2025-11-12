@@ -103,8 +103,6 @@ class WilayahSeeder extends Seeder
                     'nama_wilayah' => $data['nama_wilayah'],
                     'latitude' => $data['latitude'],
                     'longitude' => $data['longitude'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ]);
             }
         }

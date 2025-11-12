@@ -26,7 +26,7 @@ return new class extends Migration
             $table->id('activitylog_id');
 
             // user_id bisa null jika aksi dilakukan oleh sistem (bukan user)
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->foreignId('user_id')->nullable()->constrained('users', 'user_id')->onDelete('set null');
 
             $table->rawColumn('action', 'action_log_enum');
             $table->text('description')->nullable();

@@ -55,8 +55,6 @@ class ProvinsiSeeder extends Seeder
                 'nama_provinsi' => $provinsi['nama_provinsi'],
                 'latitude' => $provinsi['latitude'],
                 'longitude' => $provinsi['longitude'],
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
         }
     }

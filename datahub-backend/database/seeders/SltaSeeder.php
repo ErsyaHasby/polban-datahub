@@ -138,8 +138,6 @@ class SltaSeeder extends Seeder
         foreach ($sltas as $nama_slta) {
             DB::table('slta')->insert([
                 'nama_slta_resmi' => $nama_slta,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
         }
     }
