@@ -5,10 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * @deprecated Use Wilayah model instead
- */
-class KabupatenKota extends Model
+class Wilayah extends Model
 {
     use HasFactory;
 

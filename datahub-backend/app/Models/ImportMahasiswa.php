@@ -10,6 +10,7 @@ class ImportMahasiswa extends Model
     use HasFactory;
 
     protected $table = 'import_mahasiswa';
+    protected $primaryKey = 'import_id';
 
     protected $fillable = [
         'user_id',
@@ -36,7 +37,7 @@ class ImportMahasiswa extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     /**
@@ -44,6 +45,6 @@ class ImportMahasiswa extends Model
      */
     public function mahasiswa()
     {
-        return $this->hasOne(Mahasiswa::class, 'import_id');
+        return $this->hasOne(Mahasiswa::class, 'import_id', 'import_id');
     }
 }

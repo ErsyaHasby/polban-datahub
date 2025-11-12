@@ -34,10 +34,10 @@ class DatabaseSeeder extends Seeder
 
         // Panggil seeder data master (URUTAN PENTING!)
         $this->call([
-            ProvinsiSeeder::class,          // Harus pertama
-            KabupatenKotaSeeder::class,     // Harus setelah Provinsi
-            SltaSeeder::class,              // Bisa kapan saja
-            JalurDaftarSeeder::class,       // Bisa kapan saja
+            ProvinsiSeeder::class,      // Harus pertama
+            WilayahSeeder::class,       // Harus setelah Provinsi
+            SltaSeeder::class,          // Bisa kapan saja
+            JalurDaftarSeeder::class,   // Bisa kapan saja
         ]);
     }
 }

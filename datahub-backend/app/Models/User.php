@@ -53,7 +53,23 @@ class User extends Authenticatable
      */
     public function imports()
     {
-        return $this->hasMany(ImportMahasiswa::class);
+        return $this->hasMany(ImportMahasiswa::class, 'user_id');
+    }
+
+    /**
+     * Get the mahasiswa that this user imported.
+     */
+    public function importedMahasiswas()
+    {
+        return $this->hasMany(Mahasiswa::class, 'user_id_importer');
+    }
+
+    /**
+     * Get the mahasiswa that this user approved.
+     */
+    public function approvedMahasiswas()
+    {
+        return $this->hasMany(Mahasiswa::class, 'user_id_approver');
     }
 
     /**
@@ -61,6 +77,6 @@ class User extends Authenticatable
      */
     public function logs()
     {
-        return $this->hasMany(ActivityLog::class);
+        return $this->hasMany(ActivityLog::class, 'user_id');
     }
 }

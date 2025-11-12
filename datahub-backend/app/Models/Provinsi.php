@@ -10,16 +10,24 @@ class Provinsi extends Model
     use HasFactory;
 
     protected $table = 'provinsi';
+    protected $primaryKey = 'provinsi_id';
 
     protected $fillable = [
         'nama_provinsi',
+        'latitude',
+        'longitude',
+    ];
+
+    protected $casts = [
+        'latitude' => 'double',
+        'longitude' => 'double',
     ];
 
     /**
-     * Get all kabupaten/kota for this provinsi.
+     * Get all wilayah for this provinsi.
      */
-    public function kabupatenKotas()
+    public function wilayahs()
     {
-        return $this->hasMany(KabupatenKota::class, 'id_provinsi');
+        return $this->hasMany(Wilayah::class, 'provinsi_id', 'provinsi_id');
     }
 }

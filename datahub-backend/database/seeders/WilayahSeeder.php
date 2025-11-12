@@ -6,12 +6,10 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class KabupatenKotaSeeder extends Seeder
+class WilayahSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
-     * @deprecated This seeder uses the old table name 'kabupaten_kota'. Use WilayahSeeder instead.
      */
     public function run(): void
     {

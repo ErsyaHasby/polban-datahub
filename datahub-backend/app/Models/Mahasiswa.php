@@ -10,6 +10,7 @@ class Mahasiswa extends Model
     use HasFactory;
 
     protected $table = 'mahasiswa';
+    protected $primaryKey = 'mahasiswa_id';
 
     protected $fillable = [
         'import_id',
@@ -21,9 +22,9 @@ class Mahasiswa extends Model
         'jenis_kelamin',
         'agama',
         'kode_pos',
-        'id_slta',
-        'id_jalur_daftar',
-        'id_kabupaten_kota',
+        'slta_id',
+        'jalurdaftar_id',
+        'wilayah_id',
     ];
 
     protected $casts = [
@@ -35,7 +36,7 @@ class Mahasiswa extends Model
      */
     public function import()
     {
-        return $this->belongsTo(ImportMahasiswa::class, 'import_id');
+        return $this->belongsTo(ImportMahasiswa::class, 'import_id', 'import_id');
     }
 
     /**
@@ -43,7 +44,7 @@ class Mahasiswa extends Model
      */
     public function importer()
     {
-        return $this->belongsTo(User::class, 'user_id_importer');
+        return $this->belongsTo(User::class, 'user_id_importer', 'id');
     }
 
     /**
@@ -51,7 +52,7 @@ class Mahasiswa extends Model
      */
     public function approver()
     {
-        return $this->belongsTo(User::class, 'user_id_approver');
+        return $this->belongsTo(User::class, 'user_id_approver', 'id');
     }
 
     /**
@@ -59,7 +60,7 @@ class Mahasiswa extends Model
      */
     public function slta()
     {
-        return $this->belongsTo(Slta::class, 'id_slta');
+        return $this->belongsTo(Slta::class, 'slta_id', 'slta_id');
     }
 
     /**
@@ -67,14 +68,14 @@ class Mahasiswa extends Model
      */
     public function jalurDaftar()
     {
-        return $this->belongsTo(JalurDaftar::class, 'id_jalur_daftar');
+        return $this->belongsTo(JalurDaftar::class, 'jalurdaftar_id', 'jalurdaftar_id');
     }
 
     /**
-     * Get the kabupaten/kota.
+     * Get the wilayah.
      */
-    public function kabupatenKota()
+    public function wilayah()
     {
-        return $this->belongsTo(KabupatenKota::class, 'id_kabupaten_kota');
+        return $this->belongsTo(Wilayah::class, 'wilayah_id', 'wilayah_id');
     }
 }

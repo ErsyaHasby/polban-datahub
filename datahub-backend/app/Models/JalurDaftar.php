@@ -10,6 +10,7 @@ class JalurDaftar extends Model
     use HasFactory;
 
     protected $table = 'jalur_daftar';
+    protected $primaryKey = 'jalurdaftar_id';
 
     protected $fillable = [
         'nama_jalur_daftar',
@@ -20,6 +21,6 @@ class JalurDaftar extends Model
      */
     public function mahasiswas()
     {
-        return $this->hasMany(Mahasiswa::class, 'id_jalur_daftar');
+        return $this->hasMany(Mahasiswa::class, 'jalurdaftar_id', 'jalurdaftar_id');
     }
 }

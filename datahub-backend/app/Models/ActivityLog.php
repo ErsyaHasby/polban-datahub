@@ -10,6 +10,7 @@ class ActivityLog extends Model
     use HasFactory;
 
     protected $table = 'activity_logs';
+    protected $primaryKey = 'activitylog_id';
 
     // Activity logs hanya butuh created_at, tidak perlu updated_at
     const UPDATED_AT = null;
@@ -26,6 +27,6 @@ class ActivityLog extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 }

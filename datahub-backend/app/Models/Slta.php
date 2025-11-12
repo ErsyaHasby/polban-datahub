@@ -10,6 +10,7 @@ class Slta extends Model
     use HasFactory;
 
     protected $table = 'slta';
+    protected $primaryKey = 'slta_id';
 
     protected $fillable = [
         'nama_slta_resmi',
@@ -20,6 +21,6 @@ class Slta extends Model
      */
     public function mahasiswas()
     {
-        return $this->hasMany(Mahasiswa::class, 'id_slta');
+        return $this->hasMany(Mahasiswa::class, 'slta_id', 'slta_id');
     }
 }

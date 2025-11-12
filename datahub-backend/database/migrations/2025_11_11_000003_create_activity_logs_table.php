@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB; // Pastikan ini di-import
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,12 +13,11 @@ return new class extends Migration
     public function up(): void
     {
         // Daftar aksi yang bisa dicatat
-        // DB::statement("DROP TYPE IF EXISTS action_log_enum CASCADE"); // Baris ini untuk testing jika ada error   
         $actions = "'login', 'logout', 'login_failed', 'import_data', 'export_data', 'approve_data', 'reject_data', 'create_user', 'update_user'";
         DB::statement("CREATE TYPE action_log_enum AS ENUM ($actions)");
 
         Schema::create('activity_logs', function (Blueprint $table) {
-            $table->id();
+            $table->id('activitylog_id');
 
             // user_id bisa null jika aksi dilakukan oleh sistem (bukan user)
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
