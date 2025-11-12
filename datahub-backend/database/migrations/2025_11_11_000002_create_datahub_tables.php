@@ -13,11 +13,25 @@ return new class extends Migration
     public function up(): void
     {
         // Definisikan tipe ENUM kustom untuk PostgreSQL
-        DB::statement("CREATE TYPE import_status_enum AS ENUM ('pending', 'approved', 'rejected')");
-        DB::statement("CREATE TYPE jenis_kelamin_enum AS ENUM ('L', 'P')");
+        // Gunakan DO block untuk menghindari error jika type sudah ada
+        DB::statement("DO $$ BEGIN
+            CREATE TYPE import_status_enum AS ENUM ('pending', 'approved', 'rejected');
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;");
+
+        DB::statement("DO $$ BEGIN
+            CREATE TYPE jenis_kelamin_enum AS ENUM ('L', 'P');
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;");
+
         $agamas = "'Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Khonghucu', 'Lainnya'";
-        DB::statement("CREATE TYPE agama_enum AS ENUM ($agamas)");
-        DB::statement("CREATE TYPE role_enum AS ENUM ('admin', 'participant')");
+        DB::statement("DO $$ BEGIN
+            CREATE TYPE agama_enum AS ENUM ($agamas);
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;");
 
         // Tabel Master/Lookup SLTA
         Schema::create('slta', function (Blueprint $table) {
@@ -115,8 +129,7 @@ return new class extends Migration
         Schema::dropIfExists('jalur_daftar');
         Schema::dropIfExists('slta');
 
-        // Hapus ENUMs
-        DB::statement("DROP TYPE IF EXISTS role_enum");
+        // Hapus ENUMs (kecuali role_enum yang ada di users table)
         DB::statement("DROP TYPE IF EXISTS import_status_enum");
         DB::statement("DROP TYPE IF EXISTS jenis_kelamin_enum");
         DB::statement("DROP TYPE IF EXISTS agama_enum");

@@ -14,7 +14,13 @@ return new class extends Migration
     {
         // Daftar aksi yang bisa dicatat
         $actions = "'login', 'logout', 'login_failed', 'import_data', 'export_data', 'approve_data', 'reject_data', 'create_user', 'update_user'";
-        DB::statement("CREATE TYPE action_log_enum AS ENUM ($actions)");
+
+        // Gunakan DO block untuk menghindari error jika type sudah ada
+        DB::statement("DO $$ BEGIN
+            CREATE TYPE action_log_enum AS ENUM ($actions);
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;");
 
         Schema::create('activity_logs', function (Blueprint $table) {
             $table->id('activitylog_id');

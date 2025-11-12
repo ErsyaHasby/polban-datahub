@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,12 +12,29 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Create role enum first (if using PostgreSQL)
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("DO $$ BEGIN
+                CREATE TYPE role_enum AS ENUM ('admin', 'participant');
+            EXCEPTION
+                WHEN duplicate_object THEN null;
+            END $$;");
+        }
+
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Add role column
+            if (DB::getDriverName() === 'pgsql') {
+                $table->rawColumn('role', 'role_enum')->default('participant');
+            } else {
+                $table->enum('role', ['admin', 'participant'])->default('participant');
+            }
+
             $table->rememberToken();
             $table->timestamps();
         });
@@ -45,5 +63,10 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+
+        // Drop role enum if using PostgreSQL
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("DROP TYPE IF EXISTS role_enum CASCADE");
+        }
     }
 };
