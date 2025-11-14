@@ -73,7 +73,6 @@ Lainnya
 Git & GitHub Workflow
 Composer & NPM
 
-📁 Struktur Direktori (Umum)
 datahub-backend/
 ├─ app/
 ├─ routes/
