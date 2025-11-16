@@ -15,16 +15,20 @@ return new class extends Migration
             // FK TRACKING WAJIB
             // -------------------------------
             $table->foreignId('import_id')
+                ->nullable()
                 ->constrained('import_mahasiswa', 'import_id')
-                ->onDelete('restrict');
+                ->nullOnDelete();
 
             $table->foreignId('user_id_importer')
+                ->nullable()
                 ->constrained('users', 'user_id')
-                ->onDelete('restrict');
+                ->nullOnDelete();
 
             $table->foreignId('user_id_approver')
+                ->nullable()
                 ->constrained('users', 'user_id')
-                ->onDelete('restrict');
+                ->nullOnDelete();
+
 
             // -------------------------------
             // DATA MAHASISWA (nullable)
