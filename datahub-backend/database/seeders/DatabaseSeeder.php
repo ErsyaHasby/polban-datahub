@@ -26,18 +26,33 @@ class DatabaseSeeder extends Seeder
 
         // Buat user participant untuk testing
         DB::table('users')->insert([
-            'name' => 'Participant Test',
+            'name' => 'Participant',
             'email' => 'participant@polban.ac.id',
             'password' => Hash::make('password'),
             'role' => 'participant',
         ]);
 
+        // Buat user internal
+        DB::table('users')->insert([
+            'name' => 'Internal',
+            'email' => 'internal@polban.ac.id',
+            'password' => Hash::make('password'),
+            'role' => 'admin',
+        ]);
+
+        // Buat import_mahasiswa dummy untuk foreign key
+        DB::table('import_mahasiswa')->insert([
+            'user_id' => 1,
+            'status' => 'approved',
+        ]);
+
         // Panggil seeder data master (URUTAN PENTING!)
         $this->call([
-            ProvinsiSeeder::class,      // Harus pertama
-            WilayahSeeder::class,       // Harus setelah Provinsi
-            SltaSeeder::class,          // Bisa kapan saja
-            JalurDaftarSeeder::class,   // Bisa kapan saja
+            ProvinsiSeeder::class,         // Harus pertama
+            WilayahSeeder::class,          // Harus setelah Provinsi
+            SltaSeeder::class,             // Bisa kapan saja
+            JalurDaftarSeeder::class,      // Bisa kapan saja
+            MahasiswaSeeder::class,        // Terakhir, baca dari CSV
         ]);
     }
 }

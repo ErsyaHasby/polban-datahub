@@ -16,8 +16,6 @@ return new class extends Migration
 
             // ENUM: admin / participant
             $table->rawColumn('role', 'role_enum')->default('participant');
-
-            $table->timestamps();
         });
     }
 

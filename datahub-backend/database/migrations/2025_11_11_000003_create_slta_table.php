@@ -10,8 +10,7 @@ return new class extends Migration
     {
         Schema::create('slta', function (Blueprint $table) {
             $table->id('slta_id');
-            $table->string('nama_slta_resmi', 100)->unique();
-            $table->timestamps();
+            $table->string('nama_slta', 100)->unique();
         });
     }
 

@@ -23,7 +23,7 @@ class Mahasiswa extends Model
         'agama',
         'kode_pos',
         'slta_id',
-        'jalurdaftar_id',
+        'jalur_daftar_id',
         'wilayah_id',
     ];
 
@@ -44,7 +44,7 @@ class Mahasiswa extends Model
      */
     public function importer()
     {
-        return $this->belongsTo(User::class, 'user_id_importer', 'id');
+        return $this->belongsTo(User::class, 'user_id_importer', 'user_id');
     }
 
     /**
@@ -52,7 +52,7 @@ class Mahasiswa extends Model
      */
     public function approver()
     {
-        return $this->belongsTo(User::class, 'user_id_approver', 'id');
+        return $this->belongsTo(User::class, 'user_id_approver', 'user_id');
     }
 
     /**
@@ -68,7 +68,7 @@ class Mahasiswa extends Model
      */
     public function jalurDaftar()
     {
-        return $this->belongsTo(JalurDaftar::class, 'jalurdaftar_id', 'jalurdaftar_id');
+        return $this->belongsTo(JalurDaftar::class, 'jalur_daftar_id', 'jalur_daftar_id');
     }
 
     /**

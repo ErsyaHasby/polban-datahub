@@ -11,9 +11,10 @@ class Slta extends Model
 
     protected $table = 'slta';
     protected $primaryKey = 'slta_id';
+    public $timestamps = false;
 
     protected $fillable = [
-        'nama_slta_resmi',
+        'nama_slta',
     ];
 
     /**

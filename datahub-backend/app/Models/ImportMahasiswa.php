@@ -11,6 +11,7 @@ class ImportMahasiswa extends Model
 
     protected $table = 'import_mahasiswa';
     protected $primaryKey = 'import_id';
+    public $timestamps = false;
 
     protected $fillable = [
         'user_id',
@@ -37,7 +38,7 @@ class ImportMahasiswa extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     /**

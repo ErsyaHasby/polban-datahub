@@ -20,8 +20,6 @@ return new class extends Migration
             $table->double('longitude');
 
             $table->unique(['provinsi_id', 'nama_wilayah']); // kombinasi unik
-
-            $table->timestamps();
         });
     }
 

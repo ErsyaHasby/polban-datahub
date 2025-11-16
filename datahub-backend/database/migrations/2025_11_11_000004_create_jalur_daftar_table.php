@@ -11,7 +11,6 @@ return new class extends Migration
         Schema::create('jalur_daftar', function (Blueprint $table) {
             $table->id('jalur_daftar_id');
             $table->string('nama_jalur_daftar', 20)->unique();
-            $table->timestamps();
         });
     }
 

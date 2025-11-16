@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('nama_provinsi', 100)->unique();
             $table->double('latitude')->nullable();
             $table->double('longitude')->nullable();
-            $table->timestamps();
         });
     }
 

@@ -18,8 +18,8 @@ return new class extends Migration
 
             // ENUM status: pending, approved, rejected
             $table->rawColumn('status', 'import_status_enum')
-                  ->default('pending')
-                  ->index();
+                ->default('pending')
+                ->index();
 
             // RAW DATA (nullable semua)
             $table->string('kelas', 2)->nullable();
@@ -35,8 +35,6 @@ return new class extends Migration
             $table->string('nama_wilayah_raw', 100)->nullable();   // kab/kota
             $table->string('provinsi_raw', 255)->nullable();        // provinsi
             $table->text('admin_notes')->nullable();
-
-            $table->timestamps();
         });
     }
 
