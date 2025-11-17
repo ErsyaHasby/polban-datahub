@@ -16,23 +16,28 @@ class Mahasiswa extends Model
         'import_id',
         'user_id_importer',
         'user_id_approver',
+
         'kelas',
         'angkatan',
         'tgl_lahir',
         'jenis_kelamin',
         'agama',
         'kode_pos',
+
         'slta_id',
         'jalur_daftar_id',
         'wilayah_id',
     ];
 
     protected $casts = [
-        'tgl_lahir' => 'date',
+        'jenis_kelamin' => 'string', // enum
+        'agama'         => 'string', // enum
+        'tgl_lahir'     => 'date',
+        'angkatan'      => 'integer',
     ];
 
     /**
-     * Get the import record.
+     * Relasi ke ImportMahasiswa
      */
     public function import()
     {
@@ -40,7 +45,7 @@ class Mahasiswa extends Model
     }
 
     /**
-     * Get the user who imported.
+     * Relasi ke User (Importer)
      */
     public function importer()
     {
@@ -48,7 +53,7 @@ class Mahasiswa extends Model
     }
 
     /**
-     * Get the user who approved.
+     * Relasi ke User (Approver)
      */
     public function approver()
     {
@@ -56,7 +61,7 @@ class Mahasiswa extends Model
     }
 
     /**
-     * Get the SLTA.
+     * Relasi ke master SLTA
      */
     public function slta()
     {
@@ -64,7 +69,7 @@ class Mahasiswa extends Model
     }
 
     /**
-     * Get the jalur daftar.
+     * Relasi ke master Jalur Daftar
      */
     public function jalurDaftar()
     {
@@ -72,7 +77,7 @@ class Mahasiswa extends Model
     }
 
     /**
-     * Get the wilayah.
+     * Relasi ke master Wilayah
      */
     public function wilayah()
     {

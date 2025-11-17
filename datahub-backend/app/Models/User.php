@@ -2,26 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory;
 
     protected $table = 'users';
     protected $primaryKey = 'user_id';
-    public $timestamps = false;
+    public $timestamps = false; // karena di migration tidak ada timestamps()
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -29,56 +20,11 @@ class User extends Authenticatable
         'role',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
+    protected $casts = [
+        'role' => 'string', // supaya enum tetap jadi string
+    ];
+
     protected $hidden = [
         'password',
     ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'password' => 'hashed',
-        ];
-    }
-
-    /**
-     * Get the imports for this user.
-     */
-    public function imports()
-    {
-        return $this->hasMany(ImportMahasiswa::class, 'user_id');
-    }
-
-    /**
-     * Get the mahasiswa that this user imported.
-     */
-    public function importedMahasiswas()
-    {
-        return $this->hasMany(Mahasiswa::class, 'user_id_importer');
-    }
-
-    /**
-     * Get the mahasiswa that this user approved.
-     */
-    public function approvedMahasiswas()
-    {
-        return $this->hasMany(Mahasiswa::class, 'user_id_approver');
-    }
-
-    /**
-     * Get the activity logs for this user.
-     */
-    public function logs()
-    {
-        return $this->hasMany(ActivityLog::class, 'user_id');
-    }
 }

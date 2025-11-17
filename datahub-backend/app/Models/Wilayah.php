@@ -11,7 +11,7 @@ class Wilayah extends Model
 
     protected $table = 'wilayah';
     protected $primaryKey = 'wilayah_id';
-    public $timestamps = false;
+    public $timestamps = false; // tabel tidak memiliki created_at & updated_at
 
     protected $fillable = [
         'provinsi_id',
@@ -21,23 +21,15 @@ class Wilayah extends Model
     ];
 
     protected $casts = [
-        'latitude' => 'double',
-        'longitude' => 'double',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     /**
-     * Get the provinsi that owns this wilayah.
+     * Relasi ke Provinsi
      */
     public function provinsi()
     {
         return $this->belongsTo(Provinsi::class, 'provinsi_id', 'provinsi_id');
-    }
-
-    /**
-     * Get all mahasiswa from this wilayah.
-     */
-    public function mahasiswas()
-    {
-        return $this->hasMany(Mahasiswa::class, 'wilayah_id', 'wilayah_id');
     }
 }

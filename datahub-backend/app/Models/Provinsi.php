@@ -11,7 +11,7 @@ class Provinsi extends Model
 
     protected $table = 'provinsi';
     protected $primaryKey = 'provinsi_id';
-    public $timestamps = false;
+    public $timestamps = false; // tidak ada created_at & updated_at
 
     protected $fillable = [
         'nama_provinsi',
@@ -20,15 +20,8 @@ class Provinsi extends Model
     ];
 
     protected $casts = [
-        'latitude' => 'double',
-        'longitude' => 'double',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
-
-    /**
-     * Get all wilayah for this provinsi.
-     */
-    public function wilayahs()
-    {
-        return $this->hasMany(Wilayah::class, 'provinsi_id', 'provinsi_id');
-    }
 }
+    

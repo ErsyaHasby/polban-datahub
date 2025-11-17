@@ -11,17 +11,9 @@ class JalurDaftar extends Model
 
     protected $table = 'jalur_daftar';
     protected $primaryKey = 'jalur_daftar_id';
-    public $timestamps = false;
+    public $timestamps = false; // tidak ada created_at & updated_at
 
     protected $fillable = [
         'nama_jalur_daftar',
     ];
-
-    /**
-     * Get all mahasiswa from this jalur daftar.
-     */
-    public function mahasiswas()
-    {
-        return $this->hasMany(Mahasiswa::class, 'jalur_daftar_id', 'jalur_daftar_id');
-    }
 }
