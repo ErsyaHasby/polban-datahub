@@ -11,16 +11,9 @@ class Slta extends Model
 
     protected $table = 'slta';
     protected $primaryKey = 'slta_id';
+    public $timestamps = false; // karena tabel tidak punya created_at & updated_at
 
     protected $fillable = [
-        'nama_slta_resmi',
+        'nama_slta',
     ];
-
-    /**
-     * Get all mahasiswa from this SLTA.
-     */
-    public function mahasiswas()
-    {
-        return $this->hasMany(Mahasiswa::class, 'slta_id', 'slta_id');
-    }
 }

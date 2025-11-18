@@ -11,6 +11,7 @@ class ImportMahasiswa extends Model
 
     protected $table = 'import_mahasiswa';
     protected $primaryKey = 'import_id';
+    public $timestamps = false; // tidak ada created_at & updated_at
 
     protected $fillable = [
         'user_id',
@@ -29,22 +30,18 @@ class ImportMahasiswa extends Model
     ];
 
     protected $casts = [
-        'tgl_lahir' => 'date',
+        'status'        => 'string',   // import_status_enum
+        'jenis_kelamin' => 'string',   // jenis_kelamin_enum
+        'agama'         => 'string',   // agama_enum
+        'tgl_lahir'     => 'date',
+        'angkatan'      => 'integer',
     ];
 
     /**
-     * Get the user who imported this data.
+     * Relasi ke User (importer)
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
-    }
-
-    /**
-     * Get the approved mahasiswa record (if approved).
-     */
-    public function mahasiswa()
-    {
-        return $this->hasOne(Mahasiswa::class, 'import_id', 'import_id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }
