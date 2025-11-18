@@ -11,22 +11,27 @@ class ActivityLog extends Model
 
     protected $table = 'activity_logs';
     protected $primaryKey = 'activitylog_id';
-
-    // Activity logs hanya butuh created_at, tidak perlu updated_at
-    const UPDATED_AT = null;
+    public $timestamps = false; // hanya ada created_at, tidak ada updated_at
 
     protected $fillable = [
         'user_id',
         'action',
         'description',
         'ip_address',
+        'created_at',
+    ];
+
+    protected $casts = [
+        'action' => 'string', // enum action_log_enum
+        'created_at' => 'datetime',
     ];
 
     /**
-     * Get the user who performed this action.
+     * Relasi ke User
+     * user_id nullable, jadi bisa return null
      */
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 }

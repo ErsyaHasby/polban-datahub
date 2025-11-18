@@ -48,6 +48,11 @@ class ProvinsiSeeder extends Seeder
             ['nama_provinsi' => 'Maluku Utara', 'latitude' => 1.5709, 'longitude' => 127.8087],
             ['nama_provinsi' => 'Papua Barat', 'latitude' => -1.3361, 'longitude' => 133.1747],
             ['nama_provinsi' => 'Papua', 'latitude' => -4.2699, 'longitude' => 138.0804],
+            ['nama_provinsi' => 'Papua Tengah', 'latitude' => -3.8642, 'longitude' => 136.3733],
+            ['nama_provinsi' => 'Papua Pegunungan', 'latitude' => -4.2478, 'longitude' => 139.3725],
+            ['nama_provinsi' => 'Papua Selatan', 'latitude' => -7.6961, 'longitude' => 139.6819],
+            ['nama_provinsi' => 'Papua Barat Daya', 'latitude' => -1.3361, 'longitude' => 133.1747]
+
         ];
 
         foreach ($provinsis as $provinsi) {
