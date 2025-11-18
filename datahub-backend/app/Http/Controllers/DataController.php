@@ -9,8 +9,7 @@ class DataController extends Controller
 {
     public function dataMahasiswa()
     {
-        $mahasiswa = Mahasiswa::with(['wilayah', 'slta', 'jalurDaftar'])->get();
-
+        $mahasiswa = Mahasiswa::with(['slta', 'jalurDaftar','wilayah', 'provinsi' ])->get();
         return response()->json([
             'total' => $mahasiswa->count(),
             'data' => $mahasiswa

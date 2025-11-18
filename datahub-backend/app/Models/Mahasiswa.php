@@ -83,4 +83,19 @@ class Mahasiswa extends Model
     {
         return $this->belongsTo(Wilayah::class, 'wilayah_id', 'wilayah_id');
     }
+
+    /**
+     * Relasi ke master provinsi
+     */
+    public function provinsi(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Provinsi::class,
+            Wilayah::class,
+            "wilayah_id",
+            "provinsi_id",
+            "wilayah_id",
+            "provinsi_id",
+        );
+    }
 }
