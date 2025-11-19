@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         // Buat tipe ENUM 'role_enum' untuk PostgreSQL
-        // DB::statement("DROP TYPE IF EXISTS role_enum CASCADE"); // Baris ini untuk testing jika ada error
+        DB::statement("DROP TYPE IF EXISTS role_enum CASCADE"); // Baris ini untuk testing jika ada error
         DB::statement("CREATE TYPE role_enum AS ENUM ('admin', 'participant')");
 
         Schema::create('users', function (Blueprint $table) {

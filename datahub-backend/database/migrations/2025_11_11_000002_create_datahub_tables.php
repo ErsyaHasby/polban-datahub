@@ -12,10 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Definisikan tipe ENUM kustom untuk PostgreSQL
-        // DB::statement("DROP TYPE IF EXISTS import_status_enum CASCADE");
-        // DB::statement("DROP TYPE IF EXISTS jenis_kelamin_enum CASCADE");
-        // DB::statement("DROP TYPE IF EXISTS agama_enum CASCADE");
+        //Definisikan tipe ENUM kustom untuk PostgreSQL
+        DB::statement("DROP TYPE IF EXISTS import_status_enum CASCADE");
+        DB::statement("DROP TYPE IF EXISTS jenis_kelamin_enum CASCADE");
+        DB::statement("DROP TYPE IF EXISTS agama_enum CASCADE");
 
         DB::statement("CREATE TYPE import_status_enum AS ENUM ('pending', 'approved', 'rejected')");
         DB::statement("CREATE TYPE jenis_kelamin_enum AS ENUM ('L', 'P')");

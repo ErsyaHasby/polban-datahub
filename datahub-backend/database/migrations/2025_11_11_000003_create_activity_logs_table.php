@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         // Daftar aksi yang bisa dicatat
-        // DB::statement("DROP TYPE IF EXISTS action_log_enum CASCADE"); // Baris ini untuk testing jika ada error
+        DB::statement("DROP TYPE IF EXISTS action_log_enum CASCADE"); // Baris ini untuk testing jika ada error
         $actions = "'login', 'logout', 'login_failed', 'import_data', 'export_data', 'approve_data', 'reject_data', 'create_user', 'update_user'";
         DB::statement("CREATE TYPE action_log_enum AS ENUM ($actions)");
 
