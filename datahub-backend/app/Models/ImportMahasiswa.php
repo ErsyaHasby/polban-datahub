@@ -12,6 +12,7 @@ class ImportMahasiswa extends Model
     protected $table = 'import_mahasiswa';
 
     protected $fillable = [
+        'import_file_id',
         'user_id',
         'status',
         'kelas',

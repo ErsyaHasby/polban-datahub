@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ImportMahasiswa;
+use App\Models\ImportFile;
 use App\Models\Mahasiswa;
 use App\Models\Slta;
 use App\Models\JalurDaftar;
@@ -11,6 +11,7 @@ use App\Models\Provinsi;
 use App\Models\ActivityLog;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminApprovalController extends Controller
 {
@@ -22,111 +23,115 @@ class AdminApprovalController extends Controller
     }
 
     /**
-     * Get all pending imports
+     * Get all pending FILE imports
      */
     public function getPending()
     {
-        $imports = ImportMahasiswa::with('user')
+        $files = ImportFile::with('user')
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json([
-            'data' => $imports,
+            'data' => $files,
         ], 200);
     }
 
     /**
-     * Get detail of specific import
+     * Get detail of specific FILE import
      */
-    public function getDetail(ImportMahasiswa $import)
+    public function getDetail($id)
     {
-        $import->load('user');
+        $file = ImportFile::with(['user', 'importRows'])->findOrFail($id);
 
         return response()->json([
-            'data' => $import,
+            'data' => $file,
         ], 200);
     }
 
     /**
-     * Approve import and create mahasiswa record (LOGIKA v5)
+     * Approve ONE FILE (Logic V5 - Bulk Insert)
      */
-    public function approve(Request $request, ImportMahasiswa $import)
+    public function approve(Request $request, $id)
     {
-        // Cek jika sudah diproses
-        if ($import->status !== 'pending') {
-            return response()->json([
-                'message' => 'Import already processed',
-            ], 400);
+        $importFile = ImportFile::with('importRows')->findOrFail($id);
+
+        if ($importFile->status !== 'pending') {
+            return response()->json(['message' => 'File already processed'], 400);
         }
 
+        // Ambil user ID dari request untuk menghindari error intelephense
+        $adminId = $request->user()->id;
+
+        DB::beginTransaction();
         try {
-            // LOGIKA MATCHING (Nullable - JANGAN GAGAL)
+            $rows = $importFile->importRows;
+            $approvedCount = 0;
 
-            // Cari SLTA (Nullable)
-            $slta_id = null;
-            if ($import->nama_slta_raw) {
-                $slta_id = Slta::where('nama_slta_resmi', $import->nama_slta_raw)->value('id');
-            }
-
-            // Cari Jalur Daftar (Nullable)
-            $jalur_id = null;
-            if ($import->nama_jalur_daftar_raw) {
-                $jalur_id = JalurDaftar::where('nama_jalur_daftar', $import->nama_jalur_daftar_raw)->value('id');
-            }
-
-            // LOGIKA WILAYAH 2 LANGKAH (Nullable)
-            $kabupaten_id = null;
-            $provinsi_id = null;
-
-            if ($import->provinsi_raw) {
-                $provinsi_id = Provinsi::where('nama_provinsi', $import->provinsi_raw)->value('id');
-
-                // Jika provinsi ditemukan DAN ada nama wilayah, cari kabupaten
-                if ($provinsi_id && $import->nama_wilayah_raw) {
-                    $kabupaten_id = KabupatenKota::where('nama_kabupaten_kota', $import->nama_wilayah_raw)
-                        ->where('id_provinsi', $provinsi_id)
-                        ->value('id');
+            foreach ($rows as $row) {
+                // 1. Cari SLTA
+                $slta_id = null;
+                if ($row->nama_slta_raw) {
+                    $slta_id = Slta::where('nama_slta_resmi', $row->nama_slta_raw)->value('id');
                 }
+
+                // 2. Cari Jalur Daftar
+                $jalur_id = null;
+                if ($row->nama_jalur_daftar_raw) {
+                    $jalur_id = JalurDaftar::where('nama_jalur_daftar', $row->nama_jalur_daftar_raw)->value('id');
+                }
+
+                // 3. Logika Wilayah
+                $kabupaten_id = null;
+                if ($row->provinsi_raw) {
+                    $provinsi_id = Provinsi::where('nama_provinsi', $row->provinsi_raw)->value('id');
+                    if ($provinsi_id && $row->nama_wilayah_raw) {
+                        $kabupaten_id = KabupatenKota::where('nama_kabupaten_kota', $row->nama_wilayah_raw)
+                            ->where('id_provinsi', $provinsi_id)
+                            ->value('id');
+                    }
+                }
+
+                // 4. Insert ke Tabel Utama Mahasiswa
+                Mahasiswa::create([
+                    'import_id' => $row->id,
+                    'user_id_importer' => $importFile->user_id,
+                    'user_id_approver' => $adminId, // PERBAIKAN DI SINI (Line 100-an)
+                    'kelas' => $row->kelas,
+                    'angkatan' => $row->angkatan,
+                    'tgl_lahir' => $row->tgl_lahir,
+                    'jenis_kelamin' => $row->jenis_kelamin,
+                    'agama' => $row->agama,
+                    'kode_pos' => $row->kode_pos,
+                    'id_slta' => $slta_id,
+                    'id_jalur_daftar' => $jalur_id,
+                    'id_kabupaten_kota' => $kabupaten_id,
+                ]);
+
+                $row->status = 'approved';
+                $row->save();
+                $approvedCount++;
             }
 
-            // BUAT DATA FINAL (Pasti Berhasil - Semua Nullable)
-            $mahasiswa = Mahasiswa::create([
-                'import_id' => $import->id,
-                'user_id_importer' => $import->user_id,
-                'user_id_approver' => auth()->id(),
+            $importFile->status = 'approved';
+            $importFile->save();
 
-                // Data mahasiswa (nullable)
-                'kelas' => $import->kelas,
-                'angkatan' => $import->angkatan,
-                'tgl_lahir' => $import->tgl_lahir,
-                'jenis_kelamin' => $import->jenis_kelamin,
-                'agama' => $import->agama,
-                'kode_pos' => $import->kode_pos,
+            DB::commit();
 
-                // Foreign Keys (nullable)
-                'id_slta' => $slta_id,
-                'id_jalur_daftar' => $jalur_id,
-                'id_kabupaten_kota' => $kabupaten_id,
-            ]);
-
-            // Update status import
-            $import->status = 'approved';
-            $import->save();
-
-            // Log activity
             $this->activityLogService->log(
-                'approve_data',
-                "Admin approved import data #" . $import->id,
-                auth()->id(),
+                'approve_file',
+                "Admin approved file #{$importFile->id} with {$approvedCount} rows",
+                $adminId, // PERBAIKAN DI SINI (Line 127-an)
                 $request
             );
 
             return response()->json([
-                'message' => 'Data approved successfully',
-                'mahasiswa' => $mahasiswa,
+                'message' => 'File approved successfully',
+                'rows_processed' => $approvedCount
             ], 200);
+
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'message' => 'Approval failed',
                 'error' => $e->getMessage(),
@@ -135,67 +140,54 @@ class AdminApprovalController extends Controller
     }
 
     /**
-     * Reject import
+     * Reject FILE
      */
-    public function reject(Request $request, ImportMahasiswa $import)
+    public function reject(Request $request, $id)
     {
-        // Cek jika sudah diproses
-        if ($import->status !== 'pending') {
-            return response()->json([
-                'message' => 'Import already processed',
-            ], 400);
+        $importFile = ImportFile::findOrFail($id);
+
+        if ($importFile->status !== 'pending') {
+            return response()->json(['message' => 'File already processed'], 400);
         }
 
-        $request->validate([
-            'notes' => 'required|string|max:500',
-        ]);
+        $request->validate(['notes' => 'required|string|max:500']);
+
+        // Ambil user ID dari request
+        $adminId = $request->user()->id;
 
         try {
-            // Update status dan notes
-            $import->status = 'rejected';
-            $import->admin_notes = $request->input('notes');
-            $import->save();
+            $importFile->status = 'rejected';
+            $importFile->admin_feedback = $request->input('notes');
+            $importFile->save();
 
-            // Log activity
+            $importFile->importRows()->update(['status' => 'rejected']);
+
             $this->activityLogService->log(
-                'reject_data',
-                "Admin rejected import data #" . $import->id,
-                auth()->id(),
+                'reject_file',
+                "Admin rejected file #{$importFile->id}",
+                $adminId, // PERBAIKAN DI SINI (Line 170-an)
                 $request
             );
 
-            return response()->json([
-                'message' => 'Data rejected successfully',
-            ], 200);
+            return response()->json(['message' => 'File rejected successfully'], 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Rejection failed',
-                'error' => $e->getMessage(),
-            ], 500);
+            return response()->json(['message' => 'Rejection failed', 'error' => $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Get activity logs (Admin only)
-     */
     public function getLogs(Request $request)
     {
-        $query = ActivityLog::with('user')
-            ->orderBy('created_at', 'desc');
+        $query = ActivityLog::with('user')->orderBy('created_at', 'desc');
 
-        // Filter by action if provided
         if ($request->has('action')) {
             $query->where('action', $request->action);
         }
 
-        // Filter by user if provided
         if ($request->has('user_id')) {
             $query->where('user_id', $request->user_id);
         }
 
-        // Pagination
-        $perPage = $request->input('per_page', 50);
-        $logs = $query->paginate($perPage);
+        $logs = $query->paginate($request->input('per_page', 50));
 
         return response()->json($logs, 200);
     }
