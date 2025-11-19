@@ -1,30 +1,12 @@
 <template>
-  <div id="app">
-    <h1>Welcome to Laravel + Vue.js</h1>
-    <p>Your application is ready!</p>
-  </div>
+  <router-view></router-view>
 </template>
 
-<script>
-export default {
-  name: 'App',
-  data() {
-    return {
-      // Your data here
-    }
-  }
-}
+<script setup>
+// Kosongkan saja, biarkan router yang bekerja
 </script>
 
-<style scoped>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-h1 {
-  color: #42b983;
-}
+<style>
+/* Reset CSS sederhana */
+body { margin: 0; font-family: sans-serif; background-color: #f4f4f4; }
 </style>

@@ -13,6 +13,15 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
 
+    // --- TAMBAHKAN BARIS INI ---
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'user_id';
+    // ---------------------------
+
     /**
      * The attributes that are mass assignable.
      *
