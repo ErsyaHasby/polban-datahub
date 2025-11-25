@@ -1,10 +1,13 @@
 <template>
   <div class="login-page" @mousemove="handleMouseMove">
     
-    <div class="bg-shape shape-1" :style="shapeStyle1"></div>
-    <div class="bg-shape shape-2" :style="shapeStyle2"></div>
+    <div class="ocean-container" :style="oceanStyle">
+      <div class="wave wave-1"></div>
+      <div class="wave wave-2"></div>
+      <div class="wave wave-3"></div>
+    </div>
 
-    <div class="login-container">
+    <div class="login-content" :style="contentParallax">
       
       <div class="login-header">
         <img :src="'/images/logo.png'" alt="Logo Polban" class="logo-image" />
@@ -68,33 +71,32 @@ export default {
   name: 'Login',
   data() {
     return {
-      // --- Data Logika Auth ---
       email: '',
       password: '',
       loading: false,
       errorMessage: '',
-      
-      // --- Data Tampilan UI ---
       showPassword: false,
+      
+      // Koordinat Mouse untuk Parallax
       mouseX: 0,
       mouseY: 0,
     }
   },
   computed: {
-    // Menghitung posisi background shape berdasarkan posisi mouse (Parallax)
-    shapeStyle1() {
+    // 1. Parallax untuk Ombak (Bergerak berlawanan arah mouse)
+    oceanStyle() {
       return {
-        transform: `translate(${this.mouseX * -0.05}px, ${this.mouseY * -0.05}px)`
+        transform: `translate(${this.mouseX * 0.02}px, ${this.mouseY * 0.02}px)`
       }
     },
-    shapeStyle2() {
+    // 2. Parallax untuk Form Content (Bergerak sedikit mengikuti mouse agar kesan 3D)
+    contentParallax() {
       return {
-        transform: `translate(${this.mouseX * 0.08}px, ${this.mouseY * 0.08}px)`
+        transform: `translate(${this.mouseX * -0.01}px, ${this.mouseY * -0.01}px)`
       }
     }
   },
   methods: {
-    // --- Logic 1: Auth (TIDAK BERUBAH DARI KODE ASLI) ---
     async login() {
       this.loading = true
       this.errorMessage = ''
@@ -104,7 +106,7 @@ export default {
         const result = await authStore.login(this.email, this.password)
         
         if (result.success) {
-          this.$router.push({ name: 'dashboard' }) // Redirect tetap sama
+          this.$router.push({ name: 'dashboard' })
         } else {
           this.errorMessage = result.message
         }
@@ -115,10 +117,7 @@ export default {
         this.loading = false
       }
     },
-
-    // --- Logic 2: UI Interaction ---
     handleMouseMove(e) {
-      // Mengambil koordinat mouse relatif terhadap tengah layar
       this.mouseX = e.clientX - window.innerWidth / 2
       this.mouseY = e.clientY - window.innerHeight / 2
     }
@@ -128,117 +127,146 @@ export default {
 
 <style scoped>
 /* =========================================
-   1. VARIABLES & RESET
+   1. VARIABLES & LAYOUT UTAMA
    ========================================= */
 * {
   box-sizing: border-box;
 }
 
 .login-page {
-  /* Warna Background Utama: Biru Muda (#2148C0) */
-  background-color: #2148C0; 
+  /* Warna Biru Muda (#2148C0) sebagai Langit/Dasar */
+  background: linear-gradient(180deg, #2148C0 0%, #1a3a9c 100%);
   height: 100vh;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  overflow: hidden; /* Mencegah scrollbar saat animasi bergerak */
+  overflow: hidden;
   font-family: 'Poppins', sans-serif;
   color: #fff;
 }
 
 /* =========================================
-   2. BACKGROUND ANIMATION (PARALLAX)
+   2. ANIMASI OMBAK (SEA WAVES)
    ========================================= */
-.bg-shape {
+.ocean-container {
   position: absolute;
-  background-color: #21308F; /* Warna Biru Tua untuk Shape */
-  border-radius: 50%;
-  z-index: 1; /* Di bawah form login */
-  transition: transform 0.1s ease-out; /* Smooth movement */
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40%; /* Tinggi area ombak */
+  z-index: 1;
+  pointer-events: none; /* Agar mouse tembus ke background */
+}
+
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%; /* Lebar 200% agar bisa geser (looping) */
+  height: 100%;
+  background-repeat: repeat-x;
+  background-position: 0 bottom;
+  transform-origin: center bottom;
+}
+
+/* Menggunakan CSS Mask / Border Radius untuk efek lengkung */
+.wave-1 {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2321308F' fill-opacity='0.4' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: 50% 100%;
+  animation: moveWave 20s linear infinite;
+  z-index: 1;
   opacity: 0.6;
 }
 
-.shape-1 {
-  width: 600px;
-  height: 600px;
-  bottom: -150px;
-  left: -150px;
+.wave-2 {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2321308F' fill-opacity='0.7' d='M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: 50% 100%;
+  animation: moveWave 15s linear infinite reverse;
+  z-index: 2;
+  opacity: 0.8;
+  height: 90%;
 }
 
-.shape-2 {
-  width: 400px;
-  height: 400px;
-  top: -50px;
-  right: -100px;
+.wave-3 {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2321308F' fill-opacity='1' d='M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,106.7C672,117,768,171,864,197.3C960,224,1056,224,1152,197.3C1248,171,1344,117,1392,90.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: 50% 100%;
+  animation: moveWave 10s linear infinite;
+  z-index: 3;
+  height: 80%;
+}
+
+@keyframes moveWave {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 /* =========================================
-   3. LOGIN CONTAINER
+   3. CONTENT CONTAINER (NO BOX/CARD)
    ========================================= */
-.login-container {
+.login-content {
   position: relative;
-  z-index: 10; /* Di atas background shape */
+  z-index: 10; /* Di atas ombak */
   width: 100%;
   max-width: 400px;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
-  /* Glassmorphism effect opsional, atau transparan */
-  background: rgba(255, 255, 255, 0.05); /* Sedikit transparan */
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  background: transparent;
+  box-shadow: none;
+  border: none;
 }
 
-/* Header Logo */
+/* Header */
 .login-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 }
 
 .logo-image {
-  height: 80px; /* Sesuaikan ukuran logo */
-  margin-bottom: 1rem;
+  height: 90px;
+  margin-bottom: 0.5rem;
   display: block;
   margin-left: auto;
   margin-right: auto;
+  /* Memberikan sedikit shadow pada logo agar kontras */
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
 }
 
 .app-title {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   margin: 0;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* =========================================
-   4. FORM ELEMENTS
+   4. FORM INPUTS
    ========================================= */
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
-/* Input Wrapper */
 .input-group {
   position: relative;
   display: flex;
   align-items: center;
-  /* Warna Box Input: #383547 */
+  /* Warna Box Input Tetap #383547 */
   background-color: #383547;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px; /* Rounded corners */
-  padding: 0.2rem 1rem;
-  transition: all 0.3s ease;
+  border-radius: 50px; /* Lebih rounded agar seperti kapsul */
+  padding: 0.2rem 1.2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Shadow langsung di input */
+  transition: transform 0.3s;
 }
 
 .input-group:focus-within {
-  border-color: #4facfe; /* Highlight biru muda saat fokus */
-  box-shadow: 0 0 8px rgba(79, 172, 254, 0.4);
+  transform: scale(1.02);
+  border-color: #4facfe;
 }
 
-/* Icon di kiri */
 .input-icon svg {
   width: 20px;
   height: 20px;
@@ -246,94 +274,84 @@ export default {
   margin-right: 12px;
 }
 
-/* Input Field */
 .form-input {
   flex: 1;
   background: transparent;
   border: none;
   color: #ffffff;
-  padding: 0.8rem 0;
-  font-size: 0.95rem;
+  padding: 1rem 0;
+  font-size: 1rem;
   outline: none;
 }
 
 .form-input::placeholder {
   color: #888;
-  font-size: 0.85rem;
-  letter-spacing: 1px;
+  font-size: 0.9rem;
 }
 
-/* Toggle Password Button */
+/* Toggle Password */
 .toggle-password {
   background: none;
   border: none;
   cursor: pointer;
   color: #a0a0a0;
-  padding: 0;
   display: flex;
   align-items: center;
 }
-
-.toggle-password:hover {
-  color: #fff;
-}
-
-/* Error Alert */
-.error-alert {
-  background: rgba(220, 38, 38, 0.2);
-  border: 1px solid #ef4444;
-  color: #ffcccc;
-  padding: 0.8rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+.toggle-password:hover { color: #fff; }
 
 /* =========================================
-   5. BUTTON & FOOTER
+   5. TOMBOL & LINK
    ========================================= */
 .btn-login {
   width: 100%;
-  /* Tombol Putih dengan teks Biru sesuai desain DataHub */
   background-color: #ffffff;
-  color: #2148C0;
-  font-weight: 700;
-  padding: 0.9rem;
+  color: #21308F; /* Teks Biru Tua */
+  font-weight: 800;
+  padding: 1rem;
   border: none;
-  border-radius: 50px; /* Pill shape */
-  font-size: 1rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
   cursor: pointer;
   letter-spacing: 1px;
-  transition: transform 0.2s, box-shadow 0.2s;
-  margin-top: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background-color 0.2s;
+  margin-top: 1rem;
 }
 
 .btn-login:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
-}
-
-.btn-login:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-  transform: none;
+  background-color: #f0f0f0;
 }
 
 .forgot-pass-container {
-  text-align: right;
+  text-align: center; /* Center karena tidak ada kotak */
+  margin-top: 1rem;
 }
 
 .forgot-link {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
   text-decoration: none;
-  transition: color 0.3s;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .forgot-link:hover {
   color: #ffffff;
   text-decoration: underline;
+}
+
+/* Error Alert */
+.error-alert {
+  background: rgba(220, 38, 38, 0.8);
+  border: none;
+  color: #fff;
+  padding: 0.8rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 </style>
