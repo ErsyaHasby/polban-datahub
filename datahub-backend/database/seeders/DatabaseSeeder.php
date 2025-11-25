@@ -32,13 +32,22 @@ class DatabaseSeeder extends Seeder
             'role' => 'participant',
         ]);
 
-        // Buat user internal
+        // Buat admin datacore
         DB::table('users')->insert([
-            'name' => 'Internal',
-            'email' => 'internal@polban.ac.id',
+            'name' => 'Admin Datacore',
+            'email' => 'datacore@polban.ac.id',
             'password' => Hash::make('password'),
-            'role' => 'admin',
+            'role' => 'datacore',
         ]);
+
+        // Buat contoh mahasiswa yang login (internal)
+        DB::table('users')->insert([
+            'name' => 'Pengguna Dataview',
+            'email' => 'mhs1@polban.ac.id',
+            'password' => Hash::make('password'),
+            'role' => 'dataview',
+        ]);
+
 
         // Buat import_mahasiswa dummy untuk foreign key
         DB::table('import_mahasiswa')->insert([
@@ -50,9 +59,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ProvinsiSeeder::class,         // Harus pertama
             WilayahSeeder::class,          // Harus setelah Provinsi
-            SltaSeeder::class,             // Bisa kapan saja
-            JalurDaftarSeeder::class,      // Bisa kapan saja
-            MahasiswaSeeder::class,        // Terakhir, baca dari CSV
+            SltaSeeder::class,             //
+            JalurDaftarSeeder::class,      //
         ]);
     }
 }
