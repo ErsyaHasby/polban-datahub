@@ -1,10 +1,10 @@
 <template>
   <div class="login-page" @mousemove="handleMouseMove">
     
-    <div class="ocean-container" :style="oceanStyle">
-      <div class="wave wave-1"></div>
-      <div class="wave wave-2"></div>
-      <div class="wave wave-3"></div>
+    <div class="background-shapes">
+      <div class="shape shape-right" :style="shapeRightStyle"></div>
+      
+      <div class="shape shape-left" :style="shapeLeftStyle"></div>
     </div>
 
     <div class="login-content" :style="contentParallax">
@@ -76,22 +76,29 @@ export default {
       loading: false,
       errorMessage: '',
       showPassword: false,
-      
-      // Koordinat Mouse untuk Parallax
       mouseX: 0,
       mouseY: 0,
     }
   },
   computed: {
-    // 1. Parallax untuk Ombak (Bergerak berlawanan arah mouse)
-    oceanStyle() {
+    // Parallax Shape Kanan (Gerakan lambat & berlawanan)
+    shapeRightStyle() {
       return {
-        transform: `translate(${this.mouseX * 0.02}px, ${this.mouseY * 0.02}px)`
+        // Bergerak sedikit ke kiri/atas
+        transform: `translate(${this.mouseX * -0.02}px, ${this.mouseY * -0.02}px)`
       }
     },
-    // 2. Parallax untuk Form Content (Bergerak sedikit mengikuti mouse agar kesan 3D)
+    // Parallax Shape Kiri (Gerakan sedikit lebih cepat)
+    shapeLeftStyle() {
+      return {
+        // Bergerak sedikit ke kanan/bawah
+        transform: `translate(${this.mouseX * 0.04}px, ${this.mouseY * 0.04}px)`
+      }
+    },
+    // Parallax Content (Form Login)
     contentParallax() {
       return {
+        // Bergerak sangat sedikit ke kiri/atas (kedalaman menengah)
         transform: `translate(${this.mouseX * -0.01}px, ${this.mouseY * -0.01}px)`
       }
     }
@@ -106,7 +113,7 @@ export default {
         const result = await authStore.login(this.email, this.password)
         
         if (result.success) {
-          this.$router.push({ name: 'dashboard' })
+          this.$router.push({ name: 'dashboard' }) 
         } else {
           this.errorMessage = result.message
         }
@@ -134,7 +141,7 @@ export default {
 }
 
 .login-page {
-  /* Warna Biru Muda (#2148C0) sebagai Langit/Dasar */
+  /* Background Utama: Gradient Biru */
   background: linear-gradient(180deg, #2148C0 0%, #1a3a9c 100%);
   height: 100vh;
   width: 100%;
@@ -142,64 +149,54 @@ export default {
   justify-content: center;
   align-items: center;
   position: relative;
-  overflow: hidden;
+  overflow: hidden; 
   font-family: 'Poppins', sans-serif;
   color: #fff;
 }
 
 /* =========================================
-   2. ANIMASI OMBAK (SEA WAVES)
+   2. BACKGROUND FLUID SHAPES (Organik Sederhana)
    ========================================= */
-.ocean-container {
+.background-shapes {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   width: 100%;
-  height: 40%; /* Tinggi area ombak */
-  z-index: 1;
-  pointer-events: none; /* Agar mouse tembus ke background */
+  height: 100%;
+  overflow: hidden; 
+  z-index: 0;
+  pointer-events: none;
 }
 
-.wave {
+.shape {
   position: absolute;
+  opacity: 1; /* Biar warnanya solid dan tajam seperti di gambar */
+  transition: transform 0.1s ease-out; /* Transisi untuk Parallax */
+  animation: none; /* Dihilangkan karena terlalu kompleks */
+}
+
+/* SHAPE KANAN (Top Right Corner) */
+.shape-right {
+  top: 0;
+  right: 0;
+  width: 40vw;  
+  height: 40vh; 
+  background-color: #1a359c; /* Biru yang lebih gelap */
+  
+  /* Membuat lengkungan besar yang mengalir ke tengah layar */
+  border-bottom-left-radius: 90vh; /* Lengkungan sangat besar */
+}
+
+/* SHAPE KIRI (Bottom Left Corner) */
+.shape-left {
   bottom: 0;
   left: 0;
-  width: 200%; /* Lebar 200% agar bisa geser (looping) */
-  height: 100%;
-  background-repeat: repeat-x;
-  background-position: 0 bottom;
-  transform-origin: center bottom;
-}
-
-/* Menggunakan CSS Mask / Border Radius untuk efek lengkung */
-.wave-1 {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2321308F' fill-opacity='0.4' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
-  background-size: 50% 100%;
-  animation: moveWave 20s linear infinite;
-  z-index: 1;
-  opacity: 0.6;
-}
-
-.wave-2 {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2321308F' fill-opacity='0.7' d='M0,160L48,176C96,192,192,224,288,224C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
-  background-size: 50% 100%;
-  animation: moveWave 15s linear infinite reverse;
-  z-index: 2;
-  opacity: 0.8;
-  height: 90%;
-}
-
-.wave-3 {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%2321308F' fill-opacity='1' d='M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,106.7C672,117,768,171,864,197.3C960,224,1056,224,1152,197.3C1248,171,1344,117,1392,90.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
-  background-size: 50% 100%;
-  animation: moveWave 10s linear infinite;
-  z-index: 3;
-  height: 80%;
-}
-
-@keyframes moveWave {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  width: 40vw;
+  height: 30vh;
+  background-color: #152c7a; /* Biru paling gelap */
+  
+  /* Membuat lengkungan yang mengalir ke tengah layar */
+  border-top-right-radius: 70vh;
 }
 
 /* =========================================
@@ -207,11 +204,12 @@ export default {
    ========================================= */
 .login-content {
   position: relative;
-  z-index: 10; /* Di atas ombak */
+  z-index: 10; 
   width: 100%;
   max-width: 400px;
   padding: 1rem;
   text-align: center;
+  /* Transparan total */
   background: transparent;
   box-shadow: none;
   border: none;
@@ -228,7 +226,6 @@ export default {
   display: block;
   margin-left: auto;
   margin-right: auto;
-  /* Memberikan sedikit shadow pada logo agar kontras */
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
 }
 
@@ -253,12 +250,11 @@ export default {
   position: relative;
   display: flex;
   align-items: center;
-  /* Warna Box Input Tetap #383547 */
   background-color: #383547;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50px; /* Lebih rounded agar seperti kapsul */
+  border-radius: 50px; /* Kapsul Shape */
   padding: 0.2rem 1.2rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Shadow langsung di input */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
   transition: transform 0.3s;
 }
 
@@ -289,7 +285,6 @@ export default {
   font-size: 0.9rem;
 }
 
-/* Toggle Password */
 .toggle-password {
   background: none;
   border: none;
@@ -325,7 +320,7 @@ export default {
 }
 
 .forgot-pass-container {
-  text-align: center; /* Center karena tidak ada kotak */
+  text-align: center; 
   margin-top: 1rem;
 }
 
