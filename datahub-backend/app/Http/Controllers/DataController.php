@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 
 class DataController extends Controller
 {
+    public function __construct(ActivityLogService $activityLogService)
+    {
+        $this->activityLogService = $activityLogService;
+    }
+    
     public function dataMahasiswa()
     {
         $mahasiswa = Mahasiswa::with(['slta', 'jalurDaftar','wilayah', 'provinsi' ])->get();

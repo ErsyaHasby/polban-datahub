@@ -19,7 +19,7 @@ return new class extends Migration
 
         // ENUM untuk status impor
         DB::statement("DO $$ BEGIN
-            CREATE TYPE import_status_enum AS ENUM ('pending', 'approved', 'rejected');
+            CREATE TYPE import_status_enum AS ENUM ('uploaded', 'reviewed', 'approved', 'rejected', 'in_process', 'visualizing', 'completed');
         EXCEPTION
             WHEN duplicate_object THEN null;
         END $$;");

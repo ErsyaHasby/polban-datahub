@@ -11,7 +11,7 @@ class Slta extends Model
 
     protected $table = 'slta';
     protected $primaryKey = 'slta_id';
-    public $timestamps = false; // karena tabel tidak punya created_at & updated_at
+    public $timestamps = false; 
 
     protected $fillable = [
         'nama_slta',

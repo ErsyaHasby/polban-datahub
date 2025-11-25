@@ -12,10 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Konfigurasi bawaan Ersyahasby
         $middleware->trustProxies(at: "*");
-
-        // Tambahan dari Hanzz78 (Untuk Role)
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);

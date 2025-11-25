@@ -11,11 +11,15 @@ class ImportMahasiswa extends Model
 
     protected $table = 'import_mahasiswa';
     protected $primaryKey = 'import_id';
-    public $timestamps = false; // tidak ada created_at & updated_at
+    public $timestamps = false;
 
     protected $fillable = [
         'user_id',
         'status',
+        'admin_notes',
+        'file_name',    
+        'file_path',   
+        'total_rows',
         'kelas',
         'angkatan',
         'tgl_lahir',
@@ -35,11 +39,9 @@ class ImportMahasiswa extends Model
         'agama'         => 'string',   // agama_enum
         'tgl_lahir'     => 'date',
         'angkatan'      => 'integer',
+        'total_rows'    => 'integer',
     ];
 
-    /**
-     * Relasi ke User (importer)
-     */
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');

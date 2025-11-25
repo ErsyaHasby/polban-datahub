@@ -11,7 +11,7 @@ class Provinsi extends Model
 
     protected $table = 'provinsi';
     protected $primaryKey = 'provinsi_id';
-    public $timestamps = false; // tidak ada created_at & updated_at
+    public $timestamps = false; 
 
     protected $fillable = [
         'nama_provinsi',

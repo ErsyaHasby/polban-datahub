@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
             WilayahSeeder::class,          // Harus setelah Provinsi
             SltaSeeder::class,             // Bisa kapan saja
             JalurDaftarSeeder::class,      // Bisa kapan saja
-            MahasiswaSeeder::class,        // Terakhir, baca dari CSV
+            //MahasiswaSeeder::class,        // Terakhir, baca dari CSV
         ]);
     }
 }

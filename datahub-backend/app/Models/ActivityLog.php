@@ -11,7 +11,7 @@ class ActivityLog extends Model
 
     protected $table = 'activity_logs';
     protected $primaryKey = 'activitylog_id';
-    public $timestamps = false; // hanya ada created_at, tidak ada updated_at
+    public $timestamps = false;
 
     protected $fillable = [
         'user_id',

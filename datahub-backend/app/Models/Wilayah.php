@@ -11,7 +11,7 @@ class Wilayah extends Model
 
     protected $table = 'wilayah';
     protected $primaryKey = 'wilayah_id';
-    public $timestamps = false; // tabel tidak memiliki created_at & updated_at
+    public $timestamps = false; 
 
     protected $fillable = [
         'provinsi_id',
@@ -25,9 +25,6 @@ class Wilayah extends Model
         'longitude' => 'float',
     ];
 
-    /**
-     * Relasi ke Provinsi
-     */
     public function provinsi()
     {
         return $this->belongsTo(Provinsi::class, 'provinsi_id', 'provinsi_id');

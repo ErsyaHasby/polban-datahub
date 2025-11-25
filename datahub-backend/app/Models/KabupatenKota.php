@@ -16,17 +16,11 @@ class KabupatenKota extends Model
         'nama_kabupaten_kota',
     ];
 
-    /**
-     * Get the provinsi that owns this kabupaten/kota.
-     */
     public function provinsi()
     {
         return $this->belongsTo(Provinsi::class, 'id_provinsi');
     }
 
-    /**
-     * Get all mahasiswa from this kabupaten/kota.
-     */
     public function mahasiswas()
     {
         return $this->hasMany(Mahasiswa::class, 'id_kabupaten_kota');
