@@ -12,7 +12,7 @@ return new class extends Migration
     {
         // ENUM untuk role user
         DB::statement("DO $$ BEGIN
-            CREATE TYPE role_enum AS ENUM ('admin', 'participant');
+            CREATE TYPE role_enum AS ENUM ('admin', 'participant', 'datacore', 'dataview');
         EXCEPTION
             WHEN duplicate_object THEN null;
         END $$;");
