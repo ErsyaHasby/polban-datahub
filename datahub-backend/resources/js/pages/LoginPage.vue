@@ -2,9 +2,17 @@
   <div class="login-page" @mousemove="handleMouseMove">
     
     <div class="background-shapes">
-      <div class="shape shape-right" :style="shapeRightStyle"></div>
       
-      <div class="shape shape-left" :style="shapeLeftStyle"></div>
+      <div class="blob-container right-container" :style="containerRightStyle">
+        <div class="blob shape-right"></div>
+        <div class="blob shape-right-layer"></div>
+      </div>
+      
+      <div class="blob-container left-container" :style="containerLeftStyle">
+        <div class="blob shape-left"></div>
+        <div class="blob shape-left-layer"></div>
+      </div>
+
     </div>
 
     <div class="login-content" :style="contentParallax">
@@ -81,24 +89,21 @@ export default {
     }
   },
   computed: {
-    // Parallax Shape Kanan (Gerakan lambat & berlawanan)
-    shapeRightStyle() {
+    // Parallax untuk Container Blob Kanan
+    containerRightStyle() {
       return {
-        // Bergerak sedikit ke kiri/atas
-        transform: `translate(${this.mouseX * -0.02}px, ${this.mouseY * -0.02}px)`
+        transform: `translate(${this.mouseX * -0.03}px, ${this.mouseY * -0.03}px)`
       }
     },
-    // Parallax Shape Kiri (Gerakan sedikit lebih cepat)
-    shapeLeftStyle() {
+    // Parallax untuk Container Blob Kiri
+    containerLeftStyle() {
       return {
-        // Bergerak sedikit ke kanan/bawah
-        transform: `translate(${this.mouseX * 0.04}px, ${this.mouseY * 0.04}px)`
+        transform: `translate(${this.mouseX * 0.05}px, ${this.mouseY * 0.05}px)`
       }
     },
-    // Parallax Content (Form Login)
+    // Parallax Content
     contentParallax() {
       return {
-        // Bergerak sangat sedikit ke kiri/atas (kedalaman menengah)
         transform: `translate(${this.mouseX * -0.01}px, ${this.mouseY * -0.01}px)`
       }
     }
@@ -141,8 +146,8 @@ export default {
 }
 
 .login-page {
-  /* Background Utama: Gradient Biru */
-  background: linear-gradient(180deg, #2148C0 0%, #1a3a9c 100%);
+  /* Background Utama: Gradient Biru Polban */
+  background: linear-gradient(135deg, #2148C0 0%, #172a75 100%);
   height: 100vh;
   width: 100%;
   display: flex;
@@ -155,7 +160,7 @@ export default {
 }
 
 /* =========================================
-   2. BACKGROUND FLUID SHAPES (Organik Sederhana)
+   2. BACKGROUND LIQUID BLOBS (Animasi Morphing)
    ========================================= */
 .background-shapes {
   position: absolute;
@@ -168,39 +173,92 @@ export default {
   pointer-events: none;
 }
 
-.shape {
+.blob-container {
   position: absolute;
-  opacity: 1; /* Biar warnanya solid dan tajam seperti di gambar */
-  transition: transform 0.1s ease-out; /* Transisi untuk Parallax */
-  animation: none; /* Dihilangkan karena terlalu kompleks */
+  transition: transform 0.2s ease-out; 
 }
 
-/* SHAPE KANAN (Top Right Corner) */
+.right-container {
+  top: -10%;
+  right: -10%;
+  width: 60vw;
+  height: 60vw;
+}
+
+.left-container {
+  bottom: -15%;
+  left: -15%;
+  width: 50vw;
+  height: 50vw;
+}
+
+/* Base Blob Style */
+.blob {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* Animasi "Wobble" Morphing */
+  animation: wobble 10s ease-in-out infinite alternate;
+}
+
+/* Shape Kanan (Warna Utama) */
 .shape-right {
-  top: 0;
-  right: 0;
-  width: 40vw;  
-  height: 40vh; 
-  background-color: #1a359c; /* Biru yang lebih gelap */
-  
-  /* Membuat lengkungan besar yang mengalir ke tengah layar */
-  border-bottom-left-radius: 90vh; /* Lengkungan sangat besar */
+  background: linear-gradient(45deg, #1a359c, #2a52d6);
+  opacity: 0.8;
+  z-index: 2;
 }
 
-/* SHAPE KIRI (Bottom Left Corner) */
+/* Shape Kanan (Layer Belakang) */
+.shape-right-layer {
+  background: #1a359c;
+  opacity: 0.3;
+  transform: scale(1.1) rotate(20deg);
+  animation: wobble 15s ease-in-out infinite alternate-reverse;
+  z-index: 1;
+}
+
+/* Shape Kiri (Warna Utama) */
 .shape-left {
-  bottom: 0;
-  left: 0;
-  width: 40vw;
-  height: 30vh;
-  background-color: #152c7a; /* Biru paling gelap */
-  
-  /* Membuat lengkungan yang mengalir ke tengah layar */
-  border-top-right-radius: 70vh;
+  background: linear-gradient(to right, #152c7a, #1f40b0);
+  opacity: 0.9;
+  z-index: 2;
+  animation: wobble 12s ease-in-out infinite alternate;
+}
+
+/* Shape Kiri (Layer Belakang) */
+.shape-left-layer {
+  background: #152c7a;
+  opacity: 0.4;
+  transform: scale(1.2) rotate(-10deg);
+  animation: wobble 18s ease-in-out infinite alternate-reverse;
+  z-index: 1;
+}
+
+/* Keyframes untuk Efek Liquid/Air */
+@keyframes wobble {
+  0% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: scale(1);
+  }
+  25% {
+    border-radius: 45% 55% 59% 41% / 47% 39% 61% 53%;
+  }
+  50% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    transform: scale(1.02) rotate(5deg);
+  }
+  75% {
+    border-radius: 65% 35% 30% 70% / 35% 60% 40% 60%;
+  }
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: scale(1);
+  }
 }
 
 /* =========================================
-   3. CONTENT CONTAINER (NO BOX/CARD)
+   3. CONTENT CONTAINER (NO BOX / TRANSPARAN)
    ========================================= */
 .login-content {
   position: relative;
@@ -209,13 +267,12 @@ export default {
   max-width: 400px;
   padding: 1rem;
   text-align: center;
-  /* Transparan total */
   background: transparent;
   box-shadow: none;
   border: none;
+  backdrop-filter: none;
 }
 
-/* Header */
 .login-header {
   margin-bottom: 2rem;
 }
@@ -238,7 +295,7 @@ export default {
 }
 
 /* =========================================
-   4. FORM INPUTS
+   4. FORM INPUTS & BUTTONS
    ========================================= */
 .login-form {
   display: flex;
@@ -252,15 +309,16 @@ export default {
   align-items: center;
   background-color: #383547;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50px; /* Kapsul Shape */
+  border-radius: 50px; 
   padding: 0.2rem 1.2rem;
   box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
-  transition: transform 0.3s;
+  transition: transform 0.3s, border-color 0.3s;
 }
 
 .input-group:focus-within {
   transform: scale(1.02);
   border-color: #4facfe;
+  background-color: #403d50;
 }
 
 .input-icon svg {
@@ -292,16 +350,14 @@ export default {
   color: #a0a0a0;
   display: flex;
   align-items: center;
+  padding: 5px;
 }
 .toggle-password:hover { color: #fff; }
 
-/* =========================================
-   5. TOMBOL & LINK
-   ========================================= */
 .btn-login {
   width: 100%;
   background-color: #ffffff;
-  color: #21308F; /* Teks Biru Tua */
+  color: #21308F; 
   font-weight: 800;
   padding: 1rem;
   border: none;
@@ -317,6 +373,12 @@ export default {
 .btn-login:hover {
   transform: translateY(-2px);
   background-color: #f0f0f0;
+}
+
+.btn-login:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .forgot-pass-container {
@@ -336,7 +398,6 @@ export default {
   text-decoration: underline;
 }
 
-/* Error Alert */
 .error-alert {
   background: rgba(220, 38, 38, 0.8);
   border: none;
@@ -348,5 +409,21 @@ export default {
   align-items: center;
   gap: 0.5rem;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* =========================================
+   5. BUG FIXES (AUTOFILL & DOUBLE EYE)
+   ========================================= */
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover, 
+.form-input:-webkit-autofill:focus, 
+.form-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #383547 inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
 }
 </style>
