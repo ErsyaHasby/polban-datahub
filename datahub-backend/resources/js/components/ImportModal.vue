@@ -1,4 +1,3 @@
-
 <template>
   <div class="modal-overlay" @click="$emit('close')">
     <div class="modal-content" @click.stop>
@@ -128,7 +127,7 @@ export default {
         const formData = new FormData()
         formData.append('file', this.file)
 
-        const response = await axios.post('import-data', formData, {
+        const response = await axios.post('/import-data', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'Authorization': `Bearer ${this.authStore.token}`

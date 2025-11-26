@@ -1,7 +1,17 @@
 <template>
+  <div id="app">
     <router-view></router-view>
+  </div>
 </template>
 
-<script setup>
-// Script setup kosong sudah cukup untuk menjalankan router
+<script>
+export default {
+  name: 'App'
+}
 </script>
+
+<style>
+body {
+    margin: 0;
+    }
+</style>

@@ -87,7 +87,7 @@ export default {
 
         // Create URL with params
         const queryString = new URLSearchParams(params).toString()
-        const url = `export-data${queryString ? '?' + queryString : ''}`
+        const url = `/export-data${queryString ? '?' + queryString : ''}`
         
         // Download file using fetch with blob
         const response = await fetch(`${axios.defaults.baseURL}${url}`, {

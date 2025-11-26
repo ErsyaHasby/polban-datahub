@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Mahasiswa;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -21,6 +20,9 @@ class ExportController extends Controller
         $this->activityLogService = $activityLogService;
     }
 
+    /**
+     * Export mahasiswa data (Shared - Admin & Participant)
+     */
     public function export(Request $request)
     {
         try {
@@ -32,20 +34,24 @@ class ExportController extends Controller
                 'approver'
             ]);
 
+            // Filter by angkatan if provided
             if ($request->has('angkatan')) {
                 $query->where('angkatan', $request->angkatan);
             }
 
+            // Filter by kelas if provided
             if ($request->has('kelas')) {
                 $query->where('kelas', $request->kelas);
             }
 
+            // Filter by tahun if provided
             if ($request->has('tahun')) {
                 $query->whereYear('created_at', $request->tahun);
             }
 
             $data = $query->get();
 
+            // Transform data untuk export
             $exportData = $data->map(function ($mhs) {
                 return [
                     'ID' => $mhs->id,
@@ -65,6 +71,7 @@ class ExportController extends Controller
                 ];
             });
 
+            // Log activity
             $filterDesc = [];
             if ($request->has('angkatan')) {
                 $filterDesc[] = "angkatan {$request->angkatan}";
@@ -81,21 +88,35 @@ class ExportController extends Controller
             $this->activityLogService->log(
                 'export_data',
                 $description,
-                Auth::id(),
+                auth()->id(),
                 $request
             );
 
+            // Create Excel file
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
+            // Set header
             $headers = [
-                'ID', 'Kelas', 'Angkatan', 'Tanggal Lahir', 'Jenis Kelamin',
-                'Agama', 'Kode Pos', 'SLTA', 'Jalur Daftar', 'Kabupaten/Kota',
-                'Provinsi', 'Importer', 'Approver', 'Created At'
+                'ID',
+                'Kelas',
+                'Angkatan',
+                'Tanggal Lahir',
+                'Jenis Kelamin',
+                'Agama',
+                'Kode Pos',
+                'SLTA',
+                'Jalur Daftar',
+                'Kabupaten/Kota',
+                'Provinsi',
+                'Importer',
+                'Approver',
+                'Created At'
             ];
 
             $sheet->fromArray([$headers], null, 'A1');
 
+            // Style header
             $headerRange = 'A1:N1';
             $sheet->getStyle($headerRange)->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
@@ -109,19 +130,25 @@ class ExportController extends Controller
                 ]
             ]);
 
+            // Add data rows
             $rowNumber = 2;
             foreach ($exportData as $row) {
                 $sheet->fromArray([array_values($row)], null, 'A' . $rowNumber);
                 $rowNumber++;
             }
 
+            // Auto-size columns
             foreach (range('A', 'N') as $col) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
 
+            // Generate filename
             $filename = 'mahasiswa_export_' . date('YmdHis') . '.xlsx';
+
+            // Create writer and download
             $writer = new Xlsx($spreadsheet);
 
+            // Set headers for download
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $filename . '"');
             header('Cache-Control: max-age=0');

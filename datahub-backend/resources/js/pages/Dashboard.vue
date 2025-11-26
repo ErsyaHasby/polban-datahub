@@ -1,116 +1,74 @@
 <template>
-  <div class="dashboard">
-    <!-- Navbar -->
-    <nav class="navbar">
-      <div class="nav-brand">
-        <h2>Polban <span>DataVerse</span></h2>
-      </div>
-      <div class="nav-user">
-        <span class="user-name">{{ authStore.user?.name }}</span>
-        <span class="user-role" :class="roleClass">{{ roleLabel }}</span>
-        <button @click="logout" class="btn-logout">Logout</button>
-      </div>
-    </nav>
+  <div class="dashboard-layout">
+    
+    <Navbar 
+      :user="authStore.user" 
+      @logout="logout" 
+      @toggle-sidebar="toggleSidebar" 
+    />
 
-    <!-- Main Content -->
-    <div class="dashboard-content">
-      <div class="welcome-section">
-        <h1>Selamat Datang, {{ authStore.user?.name }}!</h1>
-        <p>{{ welcomeMessage }}</p>
-      </div>
+    <div class="main-wrapper">
+      
+      <Sidebar 
+        :isAdmin="authStore.isAdmin"
+        :isParticipant="authStore.isParticipant"
+        :isOpen="isSidebarOpen"
+        @openImport="showImportModal = true"
+        @openExport="showExportModal = true"
+      />
 
-      <!-- Admin Menu -->
-      <div v-if="authStore.isAdmin" class="menu-grid">
-        <router-link to="/admin/review" class="menu-card">
-          <div class="card-icon">📋</div>
-          <h3>Review Data</h3>
-          <p>Approve atau reject data import dari participant</p>
-        </router-link>
+      <main class="page-content" :class="{ 'full-width': !isSidebarOpen }">
+        <div class="content-container">
+          
+          <div class="welcome-header">
+            <h1>Selamat Datang, <span class="highlight-name">{{ authStore.user?.name }}!</span></h1>
+            <p v-if="authStore.isAdmin">Kelola data import dan monitor aktivitas sistem di sini.</p>
+            <p v-else>Import dan export data mahasiswa dengan mudah.</p>
+          </div>
 
-        <router-link to="/admin/logs" class="menu-card">
-          <div class="card-icon">📊</div>
-          <h3>Activity Logs</h3>
-          <p>Lihat semua aktivitas pengguna sistem</p>
-        </router-link>
+          <div class="content-body">
+             </div>
 
-        <div @click="showExportModal = true" class="menu-card">
-          <div class="card-icon">📥</div>
-          <h3>Export Data</h3>
-          <p>Download data mahasiswa dalam format Excel/CSV</p>
-        </div>
-      </div>
-
-      <!-- Participant Menu -->
-      <div v-if="authStore.isParticipant" class="menu-grid">
-        <div @click="showImportModal = true" class="menu-card">
-          <div class="card-icon">📤</div>
-          <h3>Import Data</h3>
-          <p>Upload file CSV/Excel untuk import data mahasiswa</p>
         </div>
 
-        <div @click="showExportModal = true" class="menu-card">
-          <div class="card-icon">📥</div>
-          <h3>Export Data</h3>
-          <p>Download data mahasiswa dalam format Excel/CSV</p>
-        </div>
-      </div>
+        <Footer />
+      </main>
+
     </div>
 
-    <!-- Import Modal (Participant) -->
-    <ImportModal 
-      v-if="showImportModal" 
-      @close="showImportModal = false"
-    />
-
-    <!-- Export Modal (Both) -->
-    <ExportModal 
-      v-if="showExportModal" 
-      @close="showExportModal = false"
-    />
+    <ImportModal v-if="showImportModal" @close="showImportModal = false" />
+    <ExportModal v-if="showExportModal" @close="showExportModal = false" />
+  
   </div>
 </template>
 
 <script>
 import { useAuthStore } from '../stores/auth'
+import Navbar from '../components/Navbar.vue'
+import Sidebar from '../components/Sidebar.vue'
+import Footer from '../components/Footer.vue'
 import ImportModal from '../components/ImportModal.vue'
 import ExportModal from '../components/ExportModal.vue'
 
 export default {
   name: 'Dashboard',
   components: {
+    Navbar,
+    Sidebar,
+    Footer,
     ImportModal,
-    ExportModal,
+    ExportModal
   },
   data() {
     return {
       showImportModal: false,
       showExportModal: false,
+      isSidebarOpen: true 
     }
   },
   setup() {
     const authStore = useAuthStore()
     return { authStore }
-  },
-  mounted() {
-    console.log('Dashboard mounted')
-    console.log('User:', this.authStore.user)
-    console.log('Role:', this.authStore.user?.role)
-    console.log('isAdmin:', this.authStore.isAdmin)
-    console.log('isParticipant:', this.authStore.isParticipant)
-  },
-  computed: {
-    roleLabel() {
-      return this.authStore.isAdmin ? 'Admin' : 'Participant'
-    },
-    roleClass() {
-      return this.authStore.isAdmin ? 'role-admin' : 'role-participant'
-    },
-    welcomeMessage() {
-      if (this.authStore.isAdmin) {
-        return 'Kelola data import dan monitor aktivitas sistem'
-      }
-      return 'Import dan export data mahasiswa dengan mudah'
-    }
   },
   methods: {
     async logout() {
@@ -118,135 +76,71 @@ export default {
         await this.authStore.logout()
         this.$router.push({ name: 'login' })
       }
+    },
+    toggleSidebar() {
+      this.isSidebarOpen = !this.isSidebarOpen;
     }
   }
 }
 </script>
 
 <style scoped>
-.dashboard {
+@import url('https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+
+.dashboard-layout {
+  font-family: 'Inria Sans', sans-serif;
   min-height: 100vh;
-  background: #f1f5f9;
+  background-color: #f8fafc; 
 }
 
-/* Navbar */
-.navbar {
-  background: linear-gradient(to right, #1B2376, #2d3da6);
-  color: white;
-  padding: 1rem 2rem;
+.main-wrapper {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding-top: 90px; /* Disesuaikan dengan tinggi Navbar baru (90px) */
 }
 
-.nav-brand h2 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.nav-brand span {
-  color: #ff914d;
-}
-
-.nav-user {
+.page-content {
+  flex: 1; 
+  margin-left: 280px; 
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  min-height: calc(100vh - 90px);
+  transition: margin-left 0.3s ease-in-out; 
 }
 
-.user-name {
-  font-weight: 600;
+.page-content.full-width {
+  margin-left: 0;
 }
 
-.user-role {
-  padding: 0.3rem 0.8rem;
-  border-radius: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 600;
+.content-container {
+  /* REVISI PADDING: */
+  /* padding-top dikurangi jadi 1rem agar teks naik mendekati navbar */
+  /* padding kiri-kanan tetap 4rem agar sejajar dengan navbar */
+  padding: 1rem 4rem 3rem 4rem; 
+  flex: 1; 
+  background: white; 
 }
 
-.role-admin {
-  background: #ff914d;
-  color: #1B2376;
-}
-
-.role-participant {
-  background: #10b981;
-  color: white;
-}
-
-.btn-logout {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.btn-logout:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Content */
-.dashboard-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
-}
-
-.welcome-section {
-  margin-bottom: 3rem;
-}
-
-.welcome-section h1 {
-  color: #1e293b;
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.welcome-section p {
-  color: #64748b;
-  font-size: 1.1rem;
-}
-
-/* Menu Grid */
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.menu-card {
-  background: white;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  cursor: pointer;
-  transition: all 0.3s;
-  text-decoration: none;
-  color: inherit;
-}
-
-.menu-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-}
-
-.card-icon {
-  font-size: 3rem;
+.welcome-header {
+  margin-top: 0; 
   margin-bottom: 1rem;
 }
 
-.menu-card h3 {
-  color: #1e293b;
-  margin-bottom: 0.5rem;
+.welcome-header h1 {
+  color: #1B2376;
+  font-size: 3.5rem; 
+  font-weight: 700;
+  margin-bottom: 0rem;
+  line-height: 1.2;
 }
 
-.menu-card p {
+.highlight-name {
+  color: #F6983E; 
+}
+
+.welcome-header p {
   color: #64748b;
-  font-size: 0.9rem;
+  font-size: 1.3rem; 
+  font-weight: 300;
+  margin-top: 0.5rem;
 }
 </style>

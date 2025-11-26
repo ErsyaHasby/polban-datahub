@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', {
     actions: {
         async login(email, password) {
             try {
-                const response = await axios.post('login', {
+                const response = await axios.post('/login', {
                     email,
                     password,
                 })
@@ -53,7 +53,7 @@ export const useAuthStore = defineStore('auth', {
             // Then call logout API (in background, don't wait)
             if (tokenToUse) {
                 try {
-                    await axios.post('logout', {}, {
+                    await axios.post('/logout', {}, {
                         headers: {
                             Authorization: `Bearer ${tokenToUse}`,
                         },
@@ -69,7 +69,7 @@ export const useAuthStore = defineStore('auth', {
 
             try {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
-                const response = await axios.get('user')
+                const response = await axios.get('/user')
                 this.user = response.data
                 this.isLoggedIn = true
             } catch (error) {

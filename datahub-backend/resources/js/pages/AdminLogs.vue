@@ -1,93 +1,123 @@
 <template>
-  <div class="admin-page">
-    <!-- Navbar -->
-    <nav class="navbar">
-      <div class="nav-brand">
-        <h2>Polban <span>DataVerse</span></h2>
-      </div>
-      <div class="nav-user">
-        <router-link to="/" class="nav-link">← Dashboard</router-link>
-        <span class="user-name">{{ authStore.user?.name }}</span>
-        <button @click="logout" class="btn-logout">Logout</button>
-      </div>
-    </nav>
+  <div class="dashboard-layout">
+    
+    <Navbar 
+      :user="authStore.user" 
+      @logout="logout" 
+      @toggle-sidebar="toggleSidebar" 
+    />
 
-    <!-- Content -->
-    <div class="page-content">
-      <div class="page-header">
-        <h1>Activity Logs</h1>
-        <p>Monitor semua aktivitas pengguna di sistem</p>
-      </div>
+    <div class="main-wrapper">
+      
+      <Sidebar 
+        :isAdmin="authStore.isAdmin"
+        :isParticipant="authStore.isParticipant"
+        :isOpen="isSidebarOpen"
+      />
 
-      <!-- Filters -->
-      <div class="filters">
-        <select v-model="filterAction" @change="fetchLogs">
-          <option value="">Semua Action</option>
-          <option value="login">Login</option>
-          <option value="logout">Logout</option>
-          <option value="import_data">Import Data</option>
-          <option value="approve_data">Approve Data</option>
-          <option value="reject_data">Reject Data</option>
-          <option value="export_data">Export Data</option>
-        </select>
-      </div>
+      <main class="page-content" :class="{ 'full-width': !isSidebarOpen }">
+        <div class="content-container">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Activity Logs</h1>
+              <p class="page-subtitle">Monitor jejak aktivitas pengguna di dalam sistem</p>
+            </div>
+            <div class="breadcrumb">
+              <span>Admin</span> / <span class="active">Logs</span>
+            </div>
+          </div>
 
-      <div v-if="loading" class="loading">Loading...</div>
+          <div class="toolbar-card">
+            <div class="filter-label">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+              <span>Filter Aktivitas:</span>
+            </div>
+            
+            <div class="select-wrapper">
+              <select v-model="filterAction" @change="fetchLogs" class="custom-select">
+                <option value="">Semua Aktivitas</option>
+                <option value="login">Login</option>
+                <option value="logout">Logout</option>
+                <option value="import_data">Import Data</option>
+                <option value="approve_data">Approve Data</option>
+                <option value="reject_data">Reject Data</option>
+                <option value="export_data">Export Data</option>
+              </select>
+              <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </div>
 
-      <div v-else-if="logs.length === 0" class="empty-state">
-        <div class="empty-icon">📝</div>
-        <p>Belum ada activity logs</p>
-      </div>
+          <div class="table-card">
+            
+            <div v-if="loading" class="state-loading">
+              <div class="spinner"></div> Memuat logs...
+            </div>
 
-      <div v-else class="logs-table">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>User</th>
-              <th>Action</th>
-              <th>Description</th>
-              <th>IP Address</th>
-              <th>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="log in logs" :key="log.id">
-              <td>{{ log.id }}</td>
-              <td>{{ log.user?.name || '-' }}</td>
-              <td>
-                <span :class="['badge', getActionClass(log.action)]">
-                  {{ log.action }}
-                </span>
-              </td>
-              <td>{{ log.description }}</td>
-              <td class="ip-address">{{ log.ip_address }}</td>
-              <td>{{ formatDate(log.created_at) }}</td>
-            </tr>
-          </tbody>
-        </table>
+            <div v-else-if="logs.length === 0" class="state-empty">
+              <div class="empty-icon">📝</div>
+              <p>Belum ada data aktivitas tercatat.</p>
+            </div>
 
-        <!-- Pagination -->
-        <div v-if="pagination" class="pagination">
-          <button 
-            @click="changePage(pagination.current_page - 1)" 
-            :disabled="pagination.current_page === 1"
-            class="btn-page"
-          >
-            Previous
-          </button>
-          <span class="page-info">
-            Page {{ pagination.current_page }} of {{ pagination.last_page }}
-          </span>
-          <button 
-            @click="changePage(pagination.current_page + 1)" 
-            :disabled="pagination.current_page === pagination.last_page"
-            class="btn-page"
-          >
-            Next
-          </button>
+            <table v-else class="custom-table">
+              <thead>
+                <tr>
+                  <th width="5%">ID</th>
+                  <th width="20%">User</th>
+                  <th width="15%">Action</th>
+                  <th width="30%">Deskripsi</th>
+                  <th width="15%">IP Address</th>
+                  <th width="15%">Waktu</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="log in logs" :key="log.id">
+                  <td>#{{ log.id }}</td>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar-circle">{{ (log.user?.name || '?').charAt(0) }}</div>
+                      <span>{{ log.user?.name || 'Unknown' }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span :class="['badge', getActionClass(log.action)]">
+                      {{ formatAction(log.action) }}
+                    </span>
+                  </td>
+                  <td class="desc-cell">{{ log.description }}</td>
+                  <td class="ip-cell">{{ log.ip_address }}</td>
+                  <td class="time-cell">{{ formatDate(log.created_at) }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div v-if="pagination" class="pagination-footer">
+              <span>
+                Menampilkan halaman <strong>{{ pagination.current_page }}</strong> dari <strong>{{ pagination.last_page }}</strong>
+              </span>
+              <div class="pagination-controls">
+                <button 
+                  @click="changePage(pagination.current_page - 1)" 
+                  :disabled="pagination.current_page === 1"
+                >
+                  Previous
+                </button>
+                <button 
+                  @click="changePage(pagination.current_page + 1)" 
+                  :disabled="pagination.current_page === pagination.last_page"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+
+          </div>
+
         </div>
-      </div>
+
+        <Footer />
+      </main>
+
     </div>
   </div>
 </template>
@@ -95,11 +125,20 @@
 <script>
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
+import Navbar from '../components/Navbar.vue'
+import Sidebar from '../components/Sidebar.vue'
+import Footer from '../components/Footer.vue'
 
 export default {
   name: 'AdminLogs',
+  components: {
+    Navbar,
+    Sidebar,
+    Footer
+  },
   data() {
     return {
+      isSidebarOpen: true,
       loading: false,
       logs: [],
       pagination: null,
@@ -115,6 +154,9 @@ export default {
     this.fetchLogs()
   },
   methods: {
+    toggleSidebar() {
+      this.isSidebarOpen = !this.isSidebarOpen
+    },
     async fetchLogs() {
       this.loading = true
       try {
@@ -125,9 +167,7 @@ export default {
 
         const response = await axios.get('/admin/activity-logs', {
           params,
-          headers: {
-            'Authorization': `Bearer ${this.authStore.token}`
-          }
+          headers: { 'Authorization': `Bearer ${this.authStore.token}` }
         })
 
         this.logs = response.data.data
@@ -138,7 +178,7 @@ export default {
           total: response.data.total,
         }
       } catch (error) {
-        alert('Gagal mengambil logs: ' + (error.response?.data?.message || error.message))
+        console.error('Error fetching logs:', error)
       } finally {
         this.loading = false
       }
@@ -159,13 +199,18 @@ export default {
       }
       return classes[action] || 'badge-default'
     },
+    formatAction(action) {
+      return action.replace('_', ' ').toUpperCase()
+    },
     formatDate(dateString) {
       if (!dateString) return '-'
-      return new Date(dateString).toLocaleString('id-ID')
+      return new Date(dateString).toLocaleString('id-ID', {
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+      })
     },
-    logout() {
-      if (confirm('Yakin ingin logout?')) {
-        this.authStore.logout()
+    async logout() {
+      if (confirm('Logout?')) {
+        await this.authStore.logout()
         this.$router.push({ name: 'login' })
       }
     }
@@ -174,168 +219,221 @@ export default {
 </script>
 
 <style scoped>
-.admin-page {
+@import url('https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
+
+/* === LAYOUT UTAMA === */
+.dashboard-layout {
+  font-family: 'Inria Sans', sans-serif;
   min-height: 100vh;
-  background: #f1f5f9;
+  background-color: #f8fafc;
 }
 
-.navbar {
-  background: linear-gradient(to right, #1B2376, #2d3da6);
-  color: white;
-  padding: 1rem 2rem;
+.main-wrapper {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.nav-brand h2 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.nav-brand span {
-  color: #ff914d;
-}
-
-.nav-user {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.nav-link {
-  color: white;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.btn-logout {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
+  padding-top: 90px;
 }
 
 .page-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 3rem 2rem;
+  flex: 1;
+  margin-left: 280px;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 90px);
+  transition: margin-left 0.3s ease-in-out;
 }
 
-.page-header h1 {
-  color: #1e293b;
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+.page-content.full-width {
+  margin-left: 0;
 }
 
-.filters {
+.content-container {
+  padding: 2rem 4rem;
+  flex: 1;
+}
+
+/* === HEADER === */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 2rem;
 }
 
-.filters select {
-  padding: 0.75rem 1rem;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  background: white;
+.page-title {
+  color: #1B2376;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
 }
 
-.loading {
-  text-align: center;
-  padding: 3rem;
+.page-subtitle {
   color: #64748b;
+  margin-top: 0.2rem;
+  font-size: 1rem;
 }
 
-.empty-state {
-  text-align: center;
-  padding: 4rem;
+.breadcrumb {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+.breadcrumb .active { color: #1B2376; }
+
+/* === TOOLBAR === */
+.toolbar-card {
   background: white;
-  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
+.filter-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-weight: 600;
 }
 
-.logs-table {
+.select-wrapper {
+  position: relative;
+  width: 250px;
+}
+
+.custom-select {
+  width: 100%;
+  padding: 0.6rem 2rem 0.6rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  appearance: none;
+  background: #f8fafc;
+  color: #1e293b;
+  font-family: inherit;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: #1B2376;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* === TABLE === */
+.table-card {
   background: white;
-  border-radius: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
 }
 
-table {
+.custom-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-thead {
+.custom-table th {
   background: #f8fafc;
-}
-
-th {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: #1e293b;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-td {
-  padding: 1rem;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 0.9rem;
-}
-
-.ip-address {
-  font-family: monospace;
   color: #64748b;
+  font-weight: 700;
+  text-align: left;
+  padding: 1.2rem;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+.custom-table td {
+  padding: 1.2rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.custom-table tr:hover { background: #fdfdfd; }
+
+/* User Avatar */
+.user-cell { display: flex; align-items: center; gap: 0.8rem; font-weight: 600; }
+.avatar-circle {
+  width: 32px; height: 32px;
+  background: #e0e7ff; color: #1B2376;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-weight: bold; font-size: 0.9rem;
+}
+
+/* Badges */
 .badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
   display: inline-block;
-  padding: 0.3rem 0.7rem;
-  border-radius: 0.4rem;
-  font-size: 0.8rem;
-  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
-.badge-info { background: #dbeafe; color: #1e40af; }
-.badge-secondary { background: #e5e7eb; color: #4b5563; }
-.badge-primary { background: #e0e7ff; color: #4338ca; }
-.badge-success { background: #d1fae5; color: #065f46; }
-.badge-danger { background: #fee2e2; color: #991b1b; }
-.badge-warning { background: #fef3c7; color: #92400e; }
-.badge-default { background: #f1f5f9; color: #475569; }
+.badge-info { background: #eff6ff; color: #3b82f6; border: 1px solid #dbeafe; } /* Login */
+.badge-secondary { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; } /* Logout */
+.badge-primary { background: #eef2ff; color: #6366f1; border: 1px solid #e0e7ff; } /* Import */
+.badge-success { background: #f0fdf4; color: #22c55e; border: 1px solid #dcfce7; } /* Approve */
+.badge-danger { background: #fef2f2; color: #ef4444; border: 1px solid #fee2e2; } /* Reject */
+.badge-warning { background: #fffbeb; color: #f59e0b; border: 1px solid #fef3c7; } /* Export */
 
-.pagination {
+/* Cells */
+.desc-cell { color: #64748b; font-size: 0.9rem; }
+.ip-cell { font-family: monospace; color: #475569; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; display: inline-block; }
+.time-cell { color: #64748b; font-size: 0.85rem; white-space: nowrap; }
+
+/* Pagination */
+.pagination-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #f1f5f9;
+  color: #64748b;
+  font-size: 0.9rem;
 }
 
-.btn-page {
+.pagination-controls button {
+  background: white;
+  border: 1px solid #e2e8f0;
   padding: 0.5rem 1rem;
-  background: #1B2376;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: 8px;
   cursor: pointer;
+  color: #1e293b;
   font-weight: 600;
+  transition: all 0.2s;
 }
 
-.btn-page:disabled {
+.pagination-controls button:hover:not(:disabled) {
+  border-color: #1B2376;
+  color: #1B2376;
+}
+
+.pagination-controls button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: #f8fafc;
 }
 
-.page-info {
-  color: #64748b;
-  font-weight: 600;
+/* Loading & Empty */
+.state-loading, .state-empty {
+  text-align: center; padding: 3rem; color: #64748b;
 }
+.empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
 </style>
