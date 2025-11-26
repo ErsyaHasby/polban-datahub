@@ -5,6 +5,7 @@ import Dashboard from '../pages/Dashboard.vue'
 import AdminReview from '../pages/AdminReview.vue'
 import AdminLogs from '../pages/AdminLogs.vue'
 import NotFound from '../pages/NotFound.vue'
+import DownloadData from '../pages/DownloadData.vue'
 
 const routes = [
     {
@@ -35,6 +36,12 @@ const routes = [
         path: '/:pathMatch(.*)*',
         name: 'not-found',
         component: NotFound
+    },
+    {
+        path: '/download-data',
+        name: 'download-data',
+        component: DownloadData,
+        meta: { requiresAuth: true } // Semua user login bisa akses
     }
 ]
 

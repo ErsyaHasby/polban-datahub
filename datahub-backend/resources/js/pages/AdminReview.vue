@@ -31,7 +31,9 @@
           <div class="toolbar-card">
             <div class="search-wrapper">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input type="text" placeholder="Cari data (Nama, Kelas, Angkatan)..." class="search-input" v-model="searchQuery">
+              
+              <input type="text" placeholder="Cari data" class="search-input" v-model="searchQuery">
+            
             </div>
             <button class="btn-filter">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
@@ -191,17 +193,13 @@ import Footer from '../components/Footer.vue'
 
 export default {
   name: 'AdminReview',
-  components: {
-    Navbar,
-    Sidebar,
-    Footer
-  },
+  components: { Navbar, Sidebar, Footer },
   data() {
     return {
       isSidebarOpen: true,
       loading: false,
       pendingImports: [],
-      searchQuery: '', // Untuk fitur pencarian visual
+      searchQuery: '',
       detailModal: null,
       rejectModal: null,
       rejectNotes: '',
@@ -215,7 +213,6 @@ export default {
     this.fetchPendingImports()
   },
   computed: {
-    // Fitur Filter Sederhana di Client Side
     filteredImports() {
       if (!this.searchQuery) return this.pendingImports
       const query = this.searchQuery.toLowerCase()
@@ -227,9 +224,7 @@ export default {
     }
   },
   methods: {
-    toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen
-    },
+    toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen },
     async fetchPendingImports() {
       this.loading = true
       try {
@@ -244,10 +239,7 @@ export default {
       }
     },
     showDetail(item) { this.detailModal = item },
-    showRejectModal(item) { 
-      this.rejectModal = item 
-      this.rejectNotes = ''
-    },
+    showRejectModal(item) { this.rejectModal = item; this.rejectNotes = '' },
     async approveImport(id) {
       if (!confirm('Yakin ingin approve data ini?')) return
       try {
@@ -257,9 +249,7 @@ export default {
         this.detailModal = null
         this.fetchPendingImports()
         alert('Data berhasil diapprove!')
-      } catch (error) {
-        alert('Gagal approve.')
-      }
+      } catch (error) { alert('Gagal approve.') }
     },
     async confirmReject() {
       if (!this.rejectNotes.trim()) return alert('Alasan wajib diisi')
@@ -270,9 +260,7 @@ export default {
         this.rejectModal = null
         this.fetchPendingImports()
         alert('Data berhasil direject!')
-      } catch (error) {
-        alert('Gagal reject.')
-      }
+      } catch (error) { alert('Gagal reject.') }
     },
     formatDate(dateString) {
       if (!dateString) return '-'
@@ -293,174 +281,81 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap');
 
-/* === LAYOUT UTAMA (Sama seperti Dashboard.vue) === */
+/* === LAYOUT === */
 .dashboard-layout {
   font-family: 'Inria Sans', sans-serif;
   min-height: 100vh;
   background-color: #f8fafc;
 }
-
-.main-wrapper {
-  display: flex;
-  padding-top: 90px;
-}
-
+.main-wrapper { display: flex; padding-top: 90px; }
 .page-content {
-  flex: 1;
-  margin-left: 280px;
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - 90px);
-  transition: margin-left 0.3s ease-in-out;
+  flex: 1; margin-left: 280px; display: flex; flex-direction: column;
+  min-height: calc(100vh - 90px); transition: margin-left 0.3s ease-in-out;
 }
+.page-content.full-width { margin-left: 0; }
+.content-container { padding: 2rem 4rem; flex: 1; }
 
-.page-content.full-width {
-  margin-left: 0;
-}
-
-.content-container {
-  padding: 2rem 4rem;
-  flex: 1;
-}
-
-/* === HEADER & BREADCRUMB === */
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-}
-
-.page-title {
-  color: #1B2376;
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.page-subtitle {
-  color: #64748b;
-  margin-top: 0.2rem;
-  font-size: 1rem;
-}
-
-.breadcrumb {
-  font-size: 0.9rem;
-  color: #94a3b8;
-  font-weight: 600;
-}
+/* === HEADER === */
+.page-header { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+.page-title { color: #1B2376; font-size: 2rem; font-weight: 700; margin: 0; }
+.page-subtitle { color: #64748b; margin-top: 0.2rem; font-size: 1rem; }
+.breadcrumb { font-size: 0.9rem; color: #94a3b8; font-weight: 600; }
 .breadcrumb .active { color: #1B2376; }
 
-/* === TOOLBAR (Search & Filter) === */
+/* === TOOLBAR === */
 .toolbar-card {
-  background: white;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
+  background: white; padding: 1rem 1.5rem; border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex;
+  justify-content: space-between; align-items: center; margin-bottom: 1.5rem;
 }
-
 .search-wrapper {
-  display: flex;
-  align-items: center;
-  background: #f1f5f9;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  width: 300px;
+  display: flex; align-items: center; background: #f1f5f9;
+  padding: 0.6rem 1rem; border-radius: 8px; width: 300px;
 }
-
 .search-icon { color: #94a3b8; margin-right: 0.5rem; }
-
 .search-input {
-  border: none;
-  background: transparent;
-  width: 100%;
-  font-family: inherit;
-  outline: none;
-  font-size: 0.95rem;
-  color: #1e293b;
+  border: none; background: transparent; width: 100%;
+  font-family: inherit; outline: none; font-size: 0.95rem; color: #1e293b;
 }
-
 .btn-filter {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: white;
-  border: 1px solid #e2e8f0;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #64748b;
-  font-weight: 600;
-  transition: all 0.2s;
+  display: flex; align-items: center; gap: 0.5rem; background: white;
+  border: 1px solid #e2e8f0; padding: 0.6rem 1.2rem; border-radius: 8px;
+  cursor: pointer; color: #64748b; font-weight: 600; transition: all 0.2s;
 }
 .btn-filter:hover { border-color: #1B2376; color: #1B2376; }
 
-/* === TABLE STYLES === */
+/* === TABLE === */
 .table-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  overflow: hidden;
-  padding: 0;
+  background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  overflow: hidden; padding: 0;
 }
-
-.custom-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
+.custom-table { width: 100%; border-collapse: collapse; }
 .custom-table th {
-  background: #f8fafc;
-  color: #64748b;
-  font-weight: 700;
-  text-align: left;
-  padding: 1.2rem;
-  border-bottom: 2px solid #e2e8f0;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  background: #f8fafc; color: #64748b; font-weight: 700; text-align: left;
+  padding: 1.2rem; border-bottom: 2px solid #e2e8f0; font-size: 0.9rem;
+  text-transform: uppercase; letter-spacing: 0.5px;
 }
-
 .custom-table td {
-  padding: 1.2rem;
-  border-bottom: 1px solid #f1f5f9;
-  color: #1e293b;
+  padding: 1.2rem; border-bottom: 1px solid #f1f5f9; color: #1e293b;
   vertical-align: middle;
 }
-
 .custom-table tr:hover { background: #fdfdfd; }
-
-/* User Cell */
 .user-cell { display: flex; align-items: center; gap: 0.8rem; font-weight: 600; }
 .avatar-circle {
-  width: 35px; height: 35px;
-  background: #e0e7ff; color: #1B2376;
+  width: 35px; height: 35px; background: #e0e7ff; color: #1B2376;
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-weight: bold; font-size: 1rem;
 }
-
 .text-primary { color: #1B2376; font-weight: 700; }
 .text-small { font-size: 0.85rem; color: #94a3b8; }
-
-/* Status Badge */
 .badge {
-  padding: 0.3rem 0.8rem;
-  border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
+  padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.8rem;
+  font-weight: 700; text-transform: uppercase;
 }
 .badge-pending { background: #fff7ed; color: #F6983E; border: 1px solid #ffedd5; }
-
-/* Action Buttons */
 .action-buttons { display: flex; gap: 0.5rem; }
 .btn-icon {
-  width: 32px; height: 32px;
-  border-radius: 6px; border: none;
+  width: 32px; height: 32px; border-radius: 6px; border: none;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: transform 0.2s;
 }
@@ -468,46 +363,30 @@ export default {
 .btn-detail { background: #e0f2fe; color: #0ea5e9; }
 .btn-approve { background: #dcfce7; color: #10b981; }
 .btn-reject { background: #fee2e2; color: #ef4444; }
-
-/* Pagination */
 .pagination-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-top: 1px solid #f1f5f9;
-  color: #64748b;
-  font-size: 0.9rem;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.5rem; border-top: 1px solid #f1f5f9; color: #64748b; font-size: 0.9rem;
 }
-
 .pagination-controls button {
-  background: white;
-  border: 1px solid #e2e8f0;
-  padding: 0.4rem 0.8rem;
-  margin-left: 0.3rem;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #64748b;
+  background: white; border: 1px solid #e2e8f0; padding: 0.4rem 0.8rem;
+  margin-left: 0.3rem; border-radius: 6px; cursor: pointer; color: #64748b;
 }
 .pagination-controls button.active {
   background: #1B2376; color: white; border-color: #1B2376;
 }
 .pagination-controls button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* === MODAL STYLE === */
+/* === MODAL === */
 .modal-backdrop {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex; align-items: center; justify-content: center; z-index: 1000;
+  background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;
 }
 .modal-card {
-  background: white; width: 90%; max-width: 500px;
-  border-radius: 15px; overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  background: white; width: 90%; max-width: 500px; border-radius: 15px;
+  overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
   animation: slideUp 0.3s ease-out;
 }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
 .modal-header {
   padding: 1.2rem 1.5rem; border-bottom: 1px solid #f1f5f9;
   display: flex; justify-content: space-between; align-items: center;
@@ -516,9 +395,7 @@ export default {
 .modal-header.bg-red { background: #ef4444; color: white; border: none; }
 .btn-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #94a3b8; }
 .text-white { color: white !important; }
-
 .modal-body { padding: 1.5rem; }
-
 .detail-row {
   display: flex; justify-content: space-between; padding: 0.8rem 0;
   border-bottom: 1px solid #f8fafc;
@@ -526,17 +403,14 @@ export default {
 .detail-row:last-child { border-bottom: none; }
 .label { color: #64748b; font-weight: 600; }
 .value { color: #1e293b; font-weight: 700; text-align: right; }
-
 .form-textarea {
   width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1;
   border-radius: 8px; font-family: inherit; resize: none;
 }
-
 .modal-footer {
   padding: 1.2rem 1.5rem; background: #f8fafc;
   display: flex; justify-content: flex-end; gap: 0.8rem;
 }
-
 .btn-secondary { background: #e2e8f0; color: #475569; padding: 0.6rem 1.2rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; }
 .btn-primary { background: #1B2376; color: white; padding: 0.6rem 1.2rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; }
 .btn-danger { background: #ef4444; color: white; padding: 0.6rem 1.2rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; }
