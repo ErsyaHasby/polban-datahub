@@ -7,6 +7,7 @@ import AdminLogs from '../pages/AdminLogs.vue'
 import NotFound from '../pages/NotFound.vue'
 import DownloadData from '../pages/DownloadData.vue'
 import MyUploads from '../pages/MyUploads.vue'
+import ImportDataPage from '../pages/ImportDataPage.vue'
 
 const routes = [
     {
@@ -43,6 +44,12 @@ const routes = [
         path: '/:pathMatch(.*)*',
         name: 'not-found',
         component: NotFound
+    },
+    {
+        path: '/import-data',
+        name: 'import-data',
+        component: ImportDataPage,
+        meta: { requiresAuth: true, role: 'participant' } // Hanya participant
     },
     {
         path: '/download-data',
