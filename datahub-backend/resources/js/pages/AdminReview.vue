@@ -158,7 +158,6 @@ export default {
       this.loading = true;
       this.files = [];
       try {
-        // Endpoint ini mengambil SEMUA data import history
         const res = await axios.get('/admin/pending-imports', {
           headers: { Authorization: `Bearer ${this.authStore.token}` }
         });
@@ -196,47 +195,28 @@ export default {
         alert("File ditolak."); this.closeModal(); this.fetchPending();
       } catch(e) { alert("Gagal reject.") }
     },
-    
-    // FITUR BARU: Hapus Manual Batch
     async deleteBatch(batchId) {
-      if (!confirm(`Yakin ingin menghapus seluruh batch data ${batchId}? Aksi ini TIDAK DAPAT DIBATALKAN dan akan menghapus semua data mentah! Data yang sudah diapprove tidak akan terhapus dari tabel Mahasiswa.`)) return;
-
+      if (!confirm(`Yakin ingin menghapus seluruh batch data ${batchId}? Aksi ini TIDAK DAPAT DIBATALKAN!`)) return;
       try {
-        // Kirim permintaan DELETE. 
-        // Jika berhasil, kode akan langsung lompat ke baris alert.
         await axios.delete(`/admin/delete-batch/${batchId}`, {
           headers: { Authorization: `Bearer ${this.authStore.token}` }
         });
-        
-        // --- BLOK SUKSES ---
         alert('Batch data berhasil dihapus.'); 
         this.fetchPending(); 
-        
       } catch (e) {
-        // --- BLOK KEGAGALAN ---
         let errorMessage = 'Gagal menghapus batch.';
-        
         if (e.response && e.response.data && e.response.data.message) {
              errorMessage = e.response.data.message;
         }
-
-        // Karena Anda sudah konfirmasi data hilang di DB setelah refresh, 
-        // kita paksa anggap sukses dan refresh list.
-        
-        // Kita periksa apakah error yang terjadi adalah 404/Batch tidak ditemukan, 
-        // yang mengindikasikan data sudah hilang.
         if (e.response && e.response.status === 404 && errorMessage.includes('Batch tidak ditemukan')) {
              alert('Batch data berhasil dihapus. (Data sudah hilang di server)');
              this.fetchPending(); 
              return;
         }
-
-        // Tampilkan pesan error jika terjadi error non-404 kritis
         alert(errorMessage);
         console.error(e);
       }
     },
-
     statusClass(status) {
       if(status === 'approved') return 'badge-success';
       if(status === 'rejected') return 'badge-danger';
@@ -254,7 +234,33 @@ export default {
 /* Style Konsisten */
 .dashboard-layout { display: flex; min-height: 100vh; background: #f3f4f6; font-family: 'Inria Sans', sans-serif; }
 .main-wrapper { display: flex; flex: 1; padding-top: 80px; }
-.page-content { flex: 1; margin-left: 280px; padding: 2rem; transition: margin-left 0.3s ease; }
+
+/* === PERBAIKAN FOOTER === */
+.page-content { 
+  flex: 1; 
+  margin-left: 280px; 
+  /* padding: 2rem; <-- DIHAPUS DIPINDAH KE CONTAINER */
+  transition: margin-left 0.3s ease;
+  
+  /* Flex Column agar Footer di bawah */
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+}
+
+.page-content.full-width { margin-left: 0; }
+
+.content-container { 
+  max-width: 1200px; 
+  margin: 0 auto;
+  
+  /* Flex Grow agar konten mengisi ruang */
+  flex: 1;
+  width: 100%;
+  padding: 2rem; /* Padding dipindah ke sini */
+}
+/* ======================== */
+
 .page-title { font-size: 1.8rem; font-weight: 700; color: #111827; }
 .page-subtitle { color: #6b7280; font-size: 1rem; }
 .table-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
@@ -267,18 +273,15 @@ export default {
 .text-dark { color: #111827; font-weight: 500; }
 .state-empty { padding: 3rem; text-align: center; color: #9ca3af; font-style: italic; }
 
-/* Tombol Aksi */
 .action-cell { text-align: center; display: flex; justify-content: center; gap: 8px; }
 .btn-action-review { background: #1B2376; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
 .btn-action-delete { background: #ef4444; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
 
-/* Badge Status */
 .badge { padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: capitalize; }
 .badge-success { background-color: #dcfce7; color: #166534; }
 .badge-danger { background-color: #fee2e2; color: #991b1b; }
 .badge-warning { background-color: #fff7ed; color: #9a3412; }
 
-/* Modal Styles */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal-card.large { width: 95%; max-width: 1100px; height: 85vh; background: white; border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; }
 .modal-card.small { width: 400px; background: white; border-radius: 12px; padding: 1.5rem; }

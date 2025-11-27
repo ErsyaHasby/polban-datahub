@@ -1,23 +1,16 @@
 <template>
   <div class="dashboard-layout">
-    
-    <Navbar 
-      :user="authStore.user" 
-      @logout="logout" 
-      @toggle-sidebar="toggleSidebar" 
-    />
+    <Navbar :user="authStore.user" @logout="logout" @toggle-sidebar="toggleSidebar" />
 
     <div class="main-wrapper">
-      
       <Sidebar 
-        :isAdmin="authStore.isAdmin"
-        :isParticipant="authStore.isParticipant"
-        :isOpen="isSidebarOpen"
+        :isAdmin="authStore.isAdmin" 
+        :isParticipant="authStore.isParticipant" 
+        :isOpen="isSidebarOpen" 
       />
 
       <main class="page-content" :class="{ 'full-width': !isSidebarOpen }">
         <div class="content-container">
-          
           <div class="page-header">
             <div>
               <h1 class="page-title">Download Data</h1>
@@ -29,7 +22,6 @@
           </div>
 
           <div class="download-card">
-            
             <div class="card-left">
               <div class="icon-illustration">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -40,7 +32,6 @@
 
             <div class="card-right">
               <form @submit.prevent="downloadData" class="filter-form">
-                
                 <div class="form-group">
                   <label>Filter Pencarian</label>
                   <div class="single-search-wrapper">
@@ -61,17 +52,12 @@
                     Unduh Data Excel
                   </span>
                 </button>
-
               </form>
             </div>
-
           </div>
-
         </div>
-
         <Footer />
       </main>
-
     </div>
   </div>
 </template>
@@ -90,7 +76,7 @@ export default {
     return {
       isSidebarOpen: true,
       loading: false,
-      searchQuery: '' // Single search variable
+      searchQuery: '' 
     }
   },
   setup() {
@@ -102,8 +88,6 @@ export default {
     async downloadData() {
       this.loading = true
       try {
-        // Note: Mengirim 'search' sebagai parameter umum.
-        // Backend perlu menyesuaikan jika ingin filter pintar, atau kita bisa mapping di sini.
         const response = await axios.get('/api/export-data', {
           params: { search: this.searchQuery }, 
           responseType: 'blob',
@@ -144,21 +128,38 @@ export default {
   background-color: #f8fafc;
 }
 .main-wrapper { display: flex; padding-top: 90px; }
-.page-content {
-  flex: 1; margin-left: 280px; display: flex; flex-direction: column;
-  min-height: calc(100vh - 90px); transition: margin-left 0.3s ease-in-out;
-}
-.page-content.full-width { margin-left: 0; }
-.content-container { padding: 2rem 4rem; flex: 1; }
 
-/* Header */
+/* === PERBAIKAN FOOTER === */
+.page-content {
+  flex: 1; margin-left: 280px; 
+  /* Hapus padding dari sini */
+  /* padding: 2rem; <-- HAPUS */
+  transition: margin-left 0.3s ease-in-out;
+  
+  /* Flex Column */
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 90px);
+}
+
+.page-content.full-width { margin-left: 0; }
+
+.content-container { 
+  /* Pindah padding ke sini */
+  padding: 2rem 4rem; 
+  
+  /* Grow agar footer terdorong */
+  flex: 1;
+  width: 100%;
+}
+/* ======================== */
+
 .page-header { display: flex; justify-content: space-between; margin-bottom: 2rem; }
 .page-title { color: #1B2376; font-size: 2rem; font-weight: 700; margin: 0; }
 .page-subtitle { color: #64748b; margin-top: 0.2rem; font-size: 1rem; }
 .breadcrumb { font-size: 0.9rem; color: #94a3b8; font-weight: 600; }
 .breadcrumb .active { color: #1B2376; }
 
-/* Download Card */
 .download-card {
   background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
   display: flex; overflow: hidden; min-height: 400px;
@@ -180,7 +181,6 @@ export default {
 .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
 .form-group label { color: #1B2376; font-weight: 700; font-size: 1rem; }
 
-/* Single Input Style */
 .single-search-wrapper {
   display: flex; align-items: center; position: relative;
 }
@@ -188,7 +188,7 @@ export default {
   position: absolute; left: 1rem; color: #94a3b8; pointer-events: none;
 }
 .form-input-single {
-  width: 100%; padding: 1rem 1rem 1rem 3rem; /* Padding kiri besar untuk icon */
+  width: 100%; padding: 1rem 1rem 1rem 3rem;
   border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit;
   font-size: 1.1rem; transition: border-color 0.3s; outline: none;
 }

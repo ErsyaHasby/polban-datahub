@@ -101,9 +101,33 @@ export default {
 /* Reuse Style dari AdminReview agar konsisten */
 .dashboard-layout { display: flex; min-height: 100vh; background: #f3f4f6; font-family: 'Inria Sans', sans-serif; }
 .main-wrapper { display: flex; flex: 1; padding-top: 80px; }
-.page-content { flex: 1; margin-left: 280px; padding: 2rem; transition: margin-left 0.3s ease; }
+
+/* === PERBAIKAN FOOTER === */
+.page-content { 
+  flex: 1; 
+  margin-left: 280px; 
+  /* Hapus padding dari sini agar footer bisa full width jika mau, atau tetap rapi */
+  /* padding: 2rem;  <-- DIHAPUS DIPINDAH KE BAWAH */
+  transition: margin-left 0.3s ease;
+  
+  /* Tambahan Wajib Flex Column */
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+}
+
 .page-content.full-width { margin-left: 0; }
-.content-container { max-width: 1200px; margin: 0 auto; }
+
+.content-container { 
+  max-width: 1200px; 
+  margin: 0 auto;
+  
+  /* Tambahan Wajib untuk Dorong Footer */
+  flex: 1;
+  width: 100%;
+  padding: 2rem; /* Padding dipindah ke sini */
+}
+/* ======================== */
 
 .page-title { font-size: 1.8rem; font-weight: 700; color: #111827; margin-bottom: 0.2rem; }
 .page-subtitle { color: #6b7280; font-size: 1rem; margin-bottom: 2rem; }
