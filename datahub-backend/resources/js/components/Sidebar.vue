@@ -3,42 +3,34 @@
     <div class="menu-list">
       
       <router-link v-if="isAdmin" to="/admin/review" class="menu-item" active-class="active">
-        <div class="icon-box">
-           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-        </div>
+        <div class="icon-box">🔍</div>
         <span class="menu-text">Review Data</span>
       </router-link>
 
       <router-link v-if="isAdmin" to="/admin/logs" class="menu-item" active-class="active">
-        <div class="icon-box">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="12 16 16 21 12 12 8 21 12 16"></polygon><path d="M12 2v6"></path></svg>
-        </div>
+        <div class="icon-box">📜</div>
         <span class="menu-text">Activity Logs</span>
       </router-link>
 
       <a v-if="isParticipant" href="#" @click.prevent="$emit('openImport')" class="menu-item">
-        <div class="icon-box">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-        </div>
+        <div class="icon-box">📤</div>
         <span class="menu-text">Import Data</span>
       </a>
 
-      <router-link to="/download-data" class="menu-item" active-class="active">
+      <router-link v-if="isParticipant" to="/my-uploads" class="menu-item" active-class="active">
         <div class="icon-box">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         </div>
+        <span class="menu-text">Riwayat Upload</span>
+      </router-link>
+
+      <router-link to="/download-data" class="menu-item" active-class="active">
+        <div class="icon-box">💾</div>
         <span class="menu-text">Download Data</span>
       </router-link>
 
     </div>
-
-    <div class="sidebar-footer">
-      <a href="#" class="faq-link">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-        <span class="menu-text">FAQ</span>
-      </a>
-    </div>
-  </aside>
+    </aside>
 </template>
 
 <script>

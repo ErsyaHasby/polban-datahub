@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
+// use Illuminate\Validation\ValidationException; <-- TIDAK DIPERLUKAN LAGI
 
 class AuthController extends Controller
 {
@@ -64,6 +64,7 @@ class AuthController extends Controller
 
     /**
      * Login user and create token
+     * PERBAIKAN: Mengembalikan JSON 401 alih-alih melempar exception.
      */
     public function login(Request $request)
     {
@@ -75,9 +76,10 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            // Mengganti throw ValidationException dengan return response()->json
+            return response()->json([
+                'message' => 'The provided credentials are incorrect.',
+            ], 401); 
         }
 
         // Create token

@@ -11,30 +11,36 @@ return new class extends Migration
         Schema::create('import_mahasiswa', function (Blueprint $table) {
             $table->id('import_id');
 
-            // FK ke users (importer) - wajib ada
+            // FK ke users (importer)
             $table->foreignId('user_id')
                 ->constrained('users', 'user_id')
                 ->onDelete('cascade');
 
-            // ENUM status: pending, approved, rejected
+            // --- KOLOM BARU UNTUK GROUPING FILE ---
+            $table->uuid('batch_id')->index(); // Penanda unik per upload file
+            $table->string('filename')->index(); // Nama file asli
+            // -------------------------------------
+
+            // Status berlaku per baris, tapi nanti diupdate massal per batch_id
             $table->rawColumn('status', 'import_status_enum')
                 ->default('pending')
                 ->index();
 
-            // RAW DATA (nullable semua)
-            $table->string('kelas', 2)->nullable();
+            // RAW DATA
+            $table->string('kelas', 10)->nullable();
             $table->integer('angkatan')->nullable();
             $table->date('tgl_lahir')->nullable();
-
-            $table->rawColumn('jenis_kelamin', 'jenis_kelamin_enum')->nullable();
-            $table->rawColumn('agama', 'agama_enum')->nullable();
-
-            $table->string('kode_pos', 5)->nullable();
+            $table->string('jenis_kelamin', 20)->nullable();
+            $table->string('agama', 20)->nullable();
+            $table->string('kode_pos', 10)->nullable();
             $table->string('nama_slta_raw', 255)->nullable();
-            $table->string('nama_jalur_daftar_raw', 20)->nullable();
-            $table->string('nama_wilayah_raw', 100)->nullable();   // kab/kota
-            $table->string('provinsi_raw', 255)->nullable();        // provinsi
+            $table->string('nama_jalur_daftar_raw', 100)->nullable();
+            $table->string('nama_wilayah_raw', 100)->nullable();
+            $table->string('provinsi_raw', 255)->nullable();
+            
             $table->text('admin_notes')->nullable();
+            
+            $table->timestamps(); // Penting untuk sort berdasarkan waktu upload
         });
     }
 

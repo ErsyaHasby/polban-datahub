@@ -6,6 +6,8 @@ use App\Models\ImportMahasiswa;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;   // Penting untuk grouping
+use Illuminate\Support\Str;          // Penting untuk UUID
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ImportController extends Controller
@@ -18,7 +20,30 @@ class ImportController extends Controller
     }
 
     /**
-     * Store imported data (Participant only)
+     * Get User's Upload History (Grouped by Batch/File)
+     * Perbaikan: Menggunakan GROUP BY agar tampilan tidak double-double per baris
+     */
+    public function myUploads(Request $request)
+    {
+        $uploads = DB::table('import_mahasiswa')
+            ->select('batch_id')
+            ->selectRaw("MAX(filename) as filename")
+            ->selectRaw("MAX(status) as status")
+            ->selectRaw("MAX(created_at) as created_at")
+            ->selectRaw("MAX(admin_notes) as admin_notes")
+            ->selectRaw("COUNT(*) as total_rows")
+            ->where('user_id', auth()->id())
+            //->where('status', '!=', 'archived')
+            ->groupBy('batch_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json(['data' => $uploads]);
+    }
+
+    /**
+     * Store imported data
+     * Perbaikan: Skip kolom index 0 (No) dan perbaikan parameter Log
      */
     public function store(Request $request)
     {
@@ -27,121 +52,72 @@ class ImportController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
         try {
             $file = $request->file('file');
-            $extension = $file->getClientOriginalExtension();
+            $originalFilename = $file->getClientOriginalName();
+            $batchId = (string) Str::uuid();
+            $now = now(); 
 
-            $rowCount = 0;
-            $errors = [];
+            $rowsToInsert = [];
+            
+            $spreadsheet = IOFactory::load($file->getRealPath());
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
 
-            if (in_array($extension, ['csv', 'txt'])) {
-                $handle = fopen($file->getRealPath(), 'r');
+            // Skip Header (Baris 1)
+            array_shift($rows);
 
-                $header = fgetcsv($handle);
-                if (!$header) {
-                    throw new \Exception('File CSV kosong');
-                }
+            foreach ($rows as $row) {
+                if (empty(array_filter($row))) continue;
 
-                $lineNumber = 1;
+                // Index digeser +1 karena ada kolom "No" di index 0
+                $rowsToInsert[] = [
+                    'user_id' => auth()->id(),
+                    'batch_id' => $batchId,
+                    'filename' => $originalFilename,
+                    'status' => 'pending',
+                    
+                    // MAPPING DATA (Excel Column Index 1 = Kolom B)
+                    'kelas'                 => $row[1] ?? null,
+                    'angkatan'              => isset($row[2]) && $row[2] !== '' ? (int)$row[2] : null,
+                    'tgl_lahir'             => $row[3] ?? null,
+                    'jenis_kelamin'         => $row[4] ?? null,
+                    'agama'                 => $row[5] ?? null,
+                    'kode_pos'              => $row[6] ?? null,
+                    'nama_slta_raw'         => $row[7] ?? null,
+                    'nama_jalur_daftar_raw' => $row[8] ?? null,
+                    'nama_wilayah_raw'      => $row[9] ?? null,
+                    'provinsi_raw'          => $row[10] ?? null,
+                    
+                    'admin_notes' => null,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
 
-                while (($row = fgetcsv($handle)) !== false) {
-                    $lineNumber++;
+            if (count($rowsToInsert) > 0) {
+                ImportMahasiswa::insert($rowsToInsert);
+                
+                // Log Activity dengan parameter lengkap
+                $this->activityLogService->log(
+                    'import_data',
+                    "User uploaded file {$originalFilename}",
+                    auth()->id(),
+                    $request
+                );
 
-                    if (empty(array_filter($row))) {
-                        continue;
-                    }
-
-                    try {
-                        ImportMahasiswa::create([
-                            'user_id' => auth()->id(),
-                            'status' => 'pending',
-                            'kelas' => isset($row[0]) && $row[0] !== '' ? $row[0] : null,
-                            'angkatan' => isset($row[1]) && $row[1] !== '' ? (int)$row[1] : null,
-                            'tgl_lahir' => isset($row[2]) && $row[2] !== '' ? $row[2] : null,
-                            'jenis_kelamin' => isset($row[3]) && $row[3] !== '' ? $row[3] : null,
-                            'agama' => isset($row[4]) && $row[4] !== '' ? $row[4] : null,
-                            'kode_pos' => isset($row[5]) && $row[5] !== '' ? $row[5] : null,
-                            'nama_slta_raw' => isset($row[6]) && $row[6] !== '' ? $row[6] : null,
-                            'nama_jalur_daftar_raw' => isset($row[7]) && $row[7] !== '' ? $row[7] : null,
-                            'nama_wilayah_raw' => isset($row[8]) && $row[8] !== '' ? $row[8] : null,
-                            'provinsi_raw' => isset($row[9]) && $row[9] !== '' ? $row[9] : null,
-                        ]);
-                        $rowCount++;
-                    } catch (\Exception $e) {
-                        $errors[] = "Baris {$lineNumber}: " . $e->getMessage();
-                    }
-                }
-
-                fclose($handle);
-            } elseif (in_array($extension, ['xlsx', 'xls'])) {
-                $spreadsheet = IOFactory::load($file->getRealPath());
-                $worksheet = $spreadsheet->getActiveSheet();
-                $rows = $worksheet->toArray();
-
-                if (empty($rows)) {
-                    throw new \Exception('File Excel kosong');
-                }
-
-                // Skip header row
-                array_shift($rows);
-
-                $lineNumber = 1;
-
-                foreach ($rows as $row) {
-                    $lineNumber++;
-
-                    // Skip empty rows
-                    if (empty(array_filter($row))) {
-                        continue;
-                    }
-
-                    try {
-                        ImportMahasiswa::create([
-                            'user_id' => auth()->id(),
-                            'status' => 'pending',
-                            'kelas' => isset($row[0]) && $row[0] !== '' ? $row[0] : null,
-                            'angkatan' => isset($row[1]) && $row[1] !== '' ? (int)$row[1] : null,
-                            'tgl_lahir' => isset($row[2]) && $row[2] !== '' ? $row[2] : null,
-                            'jenis_kelamin' => isset($row[3]) && $row[3] !== '' ? $row[3] : null,
-                            'agama' => isset($row[4]) && $row[4] !== '' ? $row[4] : null,
-                            'kode_pos' => isset($row[5]) && $row[5] !== '' ? $row[5] : null,
-                            'nama_slta_raw' => isset($row[6]) && $row[6] !== '' ? $row[6] : null,
-                            'nama_jalur_daftar_raw' => isset($row[7]) && $row[7] !== '' ? $row[7] : null,
-                            'nama_wilayah_raw' => isset($row[8]) && $row[8] !== '' ? $row[8] : null,
-                            'provinsi_raw' => isset($row[9]) && $row[9] !== '' ? $row[9] : null,
-                        ]);
-                        $rowCount++;
-                    } catch (\Exception $e) {
-                        $errors[] = "Baris {$lineNumber}: " . $e->getMessage();
-                    }
-                }
+                return response()->json([
+                    'message' => 'File uploaded successfully',
+                    'batch_id' => $batchId,
+                    'rows_imported' => count($rowsToInsert)
+                ], 201);
             } else {
-                throw new \Exception('Format file tidak didukung.');
+                throw new \Exception('File kosong atau format tidak terbaca');
             }
 
-            $this->activityLogService->log(
-                'import_data',
-                "User imported {$rowCount} data rows",
-                auth()->id(),
-                $request
-            );
-
-            $response = [
-                'message' => 'Data imported successfully',
-                'rows_imported' => $rowCount,
-            ];
-
-            if (!empty($errors)) {
-                $response['errors'] = array_slice($errors, 0, 10);
-            }
-
-            return response()->json($response, 201);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Import failed',

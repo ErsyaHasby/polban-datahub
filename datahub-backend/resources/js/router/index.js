@@ -6,6 +6,7 @@ import AdminReview from '../pages/AdminReview.vue'
 import AdminLogs from '../pages/AdminLogs.vue'
 import NotFound from '../pages/NotFound.vue'
 import DownloadData from '../pages/DownloadData.vue'
+import MyUploads from '../pages/MyUploads.vue'
 
 const routes = [
     {
@@ -13,6 +14,12 @@ const routes = [
         name: 'login',
         component: Login,
         meta: { guest: true }
+    },
+    {
+    path: '/my-uploads',
+    name: 'my-uploads',
+    component: MyUploads,
+    meta: { requiresAuth: true, role: 'participant' }
     },
     {
         path: '/',
