@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str; // <--- Wajib di-import untuk generate UUID
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,7 +17,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Buat user admin
+        // 1. Buat User Admin
         DB::table('users')->insert([
             'name' => 'Admin',
             'email' => 'admin@polban.ac.id',
@@ -24,7 +25,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
         ]);
 
-        // Buat user participant untuk testing
+        // 2. Buat User Participant
         DB::table('users')->insert([
             'name' => 'Participant',
             'email' => 'participant@polban.ac.id',
@@ -32,7 +33,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'participant',
         ]);
 
-        // Buat admin datacore
+        // 3. Buat User Datacore
         DB::table('users')->insert([
             'name' => 'Admin Datacore',
             'email' => 'datacore@polban.ac.id',
@@ -40,7 +41,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'datacore',
         ]);
 
-        // Buat contoh mahasiswa yang login (internal)
+        // 4. Buat User Dataview (Internal)
         DB::table('users')->insert([
             'name' => 'Pengguna Dataview',
             'email' => 'mhs1@polban.ac.id',
@@ -48,19 +49,22 @@ class DatabaseSeeder extends Seeder
             'role' => 'dataview',
         ]);
 
-
-        // Buat import_mahasiswa dummy untuk foreign key
+        // 5. Buat Dummy Import Data (Fix Error Batch ID disini)
         DB::table('import_mahasiswa')->insert([
-            'user_id' => 1,
+            'user_id' => 1, // Milik Admin
+            'batch_id' => (string) Str::uuid(), // <--- Generate UUID batch unik
+            'filename' => 'data_awal_dummy.xlsx', // <--- Nama file dummy
             'status' => 'approved',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        // Panggil seeder data master (URUTAN PENTING!)
+        // 6. Panggil Seeder Data Master (Pastikan file-file ini ada)
         $this->call([
-            ProvinsiSeeder::class,         // Harus pertama
-            WilayahSeeder::class,          // Harus setelah Provinsi
-            SltaSeeder::class,             //
-            JalurDaftarSeeder::class,      //
+            ProvinsiSeeder::class,
+            WilayahSeeder::class,
+            SltaSeeder::class,
+            JalurDaftarSeeder::class,
         ]);
     }
 }

@@ -11,8 +11,7 @@ class ActivityLog extends Model
 
     protected $table = 'activity_logs';
     protected $primaryKey = 'activitylog_id';
-    public $timestamps = false; // hanya ada created_at, tidak ada updated_at
-
+    public $timestamps = false; 
     protected $fillable = [
         'user_id',
         'action',
@@ -22,14 +21,10 @@ class ActivityLog extends Model
     ];
 
     protected $casts = [
-        'action' => 'string', // enum action_log_enum
+        'action' => 'string',
         'created_at' => 'datetime',
     ];
 
-    /**
-     * Relasi ke User
-     * user_id nullable, jadi bisa return null
-     */
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');

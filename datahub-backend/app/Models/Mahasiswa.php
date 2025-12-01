@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class Mahasiswa extends Model
 {
@@ -30,57 +31,51 @@ class Mahasiswa extends Model
     ];
 
     protected $casts = [
-        'jenis_kelamin' => 'string', // enum
-        'agama'         => 'string', // enum
+        'jenis_kelamin' => 'string',
+        'agama'         => 'string',
         'tgl_lahir'     => 'date',
         'angkatan'      => 'integer',
     ];
 
-    /**
-     * Relasi ke ImportMahasiswa
-     */
     public function import()
     {
         return $this->belongsTo(ImportMahasiswa::class, 'import_id', 'import_id');
     }
 
-    /**
-     * Relasi ke User (Importer)
-     */
     public function importer()
     {
         return $this->belongsTo(User::class, 'user_id_importer', 'user_id');
     }
 
-    /**
-     * Relasi ke User (Approver)
-     */
     public function approver()
     {
         return $this->belongsTo(User::class, 'user_id_approver', 'user_id');
     }
 
-    /**
-     * Relasi ke master SLTA
-     */
     public function slta()
     {
         return $this->belongsTo(Slta::class, 'slta_id', 'slta_id');
     }
 
-    /**
-     * Relasi ke master Jalur Daftar
-     */
     public function jalurDaftar()
     {
         return $this->belongsTo(JalurDaftar::class, 'jalur_daftar_id', 'jalur_daftar_id');
     }
 
-    /**
-     * Relasi ke master Wilayah
-     */
     public function wilayah()
     {
         return $this->belongsTo(Wilayah::class, 'wilayah_id', 'wilayah_id');
+    }
+
+    public function provinsi(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Provinsi::class,
+            Wilayah::class,
+            "wilayah_id",
+            "provinsi_id",
+            "wilayah_id",
+            "provinsi_id",
+        );
     }
 }

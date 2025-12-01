@@ -11,11 +11,8 @@ return new class extends Migration
     public function up(): void
     {
         // ENUM untuk role user
-        DB::statement("DO $$ BEGIN
-            CREATE TYPE role_enum AS ENUM ('admin', 'participant', 'datacore', 'dataview');
-        EXCEPTION
-            WHEN duplicate_object THEN null;
-        END $$;");
+        DB::statement("DROP TYPE IF EXISTS role_enum CASCADE");
+        DB::statement("CREATE TYPE role_enum AS ENUM ('admin', 'participant', 'datacore', 'dataview')");
 
         // ENUM untuk status impor
         DB::statement("DO $$ BEGIN
@@ -40,7 +37,8 @@ return new class extends Migration
         END $$;");
 
         // ENUM untuk activity log
-        $actions = "'login', 'logout', 'login_failed', 'import_data', 'export_data', 'approve_data', 'reject_data', 'create_user', 'update_user'";
+        $actions = "'login', 'logout', 'login_failed', 'import_data', 'export_data', 'approve_data', 'reject_data', 'create_user', 'update_user', 'approve_batch', 
+            'reject_batch'";
         DB::statement("DO $$ BEGIN
             CREATE TYPE action_log_enum AS ENUM ($actions);
         EXCEPTION
