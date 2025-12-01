@@ -1,14 +1,11 @@
 <template>
   <div class="dashboard-layout">
     <Navbar :user="authStore.user" @logout="logout" @toggle-sidebar="toggleSidebar" />
-
     <div class="main-wrapper">
       <Sidebar 
-        :isAdmin="authStore.isAdmin" 
-        :isParticipant="authStore.isParticipant" 
+        :isAdmin="authStore.isAdmin" :isParticipant="authStore.isParticipant" 
         :isOpen="isSidebarOpen" 
       />
-
       <main class="page-content" :class="{ 'full-width': !isSidebarOpen }">
         <div class="content-container">
           <div class="page-header">
@@ -37,20 +34,14 @@
                   <div class="single-search-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <input 
-                      type="text" 
-                      v-model="searchQuery" 
-                      placeholder="Cari data" 
-                      class="form-input-single"
+                      type="text" v-model="searchQuery" 
+                      placeholder="Cari data" class="form-input-single"
                     >
                   </div>
                 </div>
-
                 <button type="submit" class="btn-download" :disabled="loading">
                   <span v-if="loading" class="spinner"></span>
-                  <span v-else>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Unduh Data Excel
-                  </span>
+                  <span v-else>Unduh Data Excel</span>
                 </button>
               </form>
             </div>
@@ -74,7 +65,8 @@ export default {
   components: { Navbar, Sidebar, Footer },
   data() {
     return {
-      isSidebarOpen: true,
+      // 1. LOGIC PENTING: Baca localStorage
+      isSidebarOpen: localStorage.getItem('sidebarState') === 'closed' ? false : true,
       loading: false,
       searchQuery: '' 
     }
@@ -84,7 +76,11 @@ export default {
     return { authStore }
   },
   methods: {
-    toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen },
+    // 2. LOGIC PENTING: Simpan ke localStorage
+    toggleSidebar() { 
+      this.isSidebarOpen = !this.isSidebarOpen;
+      localStorage.setItem('sidebarState', this.isSidebarOpen ? 'open' : 'closed');
+    },
     async downloadData() {
       this.loading = true
       try {
@@ -93,7 +89,6 @@ export default {
           responseType: 'blob',
           headers: { 'Authorization': `Bearer ${this.authStore.token}` }
         })
-
         const url = window.URL.createObjectURL(new Blob([response.data]))
         const link = document.createElement('a')
         link.href = url
@@ -101,10 +96,8 @@ export default {
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-
       } catch (error) {
-        alert('Gagal mengunduh data. Silakan coba lagi.')
-        console.error(error)
+        alert('Gagal mengunduh data.')
       } finally {
         this.loading = false
       }
@@ -126,33 +119,21 @@ export default {
   font-family: 'Inria Sans', sans-serif;
   min-height: 100vh;
   background-color: #f8fafc;
+  display: flex; flex-direction: column;
 }
-.main-wrapper { display: flex; padding-top: 90px; }
+.main-wrapper { display: flex; padding-top: 90px; flex: 1; min-height: 100vh; }
 
-/* === PERBAIKAN FOOTER === */
 .page-content {
   flex: 1; margin-left: 280px; 
-  /* Hapus padding dari sini */
-  /* padding: 2rem; <-- HAPUS */
-  transition: margin-left 0.3s ease-in-out;
-  
-  /* Flex Column */
-  display: flex;
-  flex-direction: column;
+  display: flex; flex-direction: column;
   min-height: calc(100vh - 90px);
+  transition: margin-left 0.3s ease-in-out;
 }
 
-.page-content.full-width { margin-left: 0; }
+/* MARGIN 90px SAAT MINI SIDEBAR */
+.page-content.full-width { margin-left: 90px; }
 
-.content-container { 
-  /* Pindah padding ke sini */
-  padding: 2rem 4rem; 
-  
-  /* Grow agar footer terdorong */
-  flex: 1;
-  width: 100%;
-}
-/* ======================== */
+.content-container { padding: 2rem 4rem; flex: 1; width: 100%; }
 
 .page-header { display: flex; justify-content: space-between; margin-bottom: 2rem; }
 .page-title { color: #1B2376; font-size: 2rem; font-weight: 700; margin: 0; }
@@ -181,12 +162,8 @@ export default {
 .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
 .form-group label { color: #1B2376; font-weight: 700; font-size: 1rem; }
 
-.single-search-wrapper {
-  display: flex; align-items: center; position: relative;
-}
-.input-icon {
-  position: absolute; left: 1rem; color: #94a3b8; pointer-events: none;
-}
+.single-search-wrapper { display: flex; align-items: center; position: relative; }
+.input-icon { position: absolute; left: 1rem; color: #94a3b8; pointer-events: none; }
 .form-input-single {
   width: 100%; padding: 1rem 1rem 1rem 3rem;
   border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit;
@@ -201,7 +178,7 @@ export default {
   gap: 0.8rem; transition: transform 0.2s, box-shadow 0.2s;
 }
 .btn-download:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 152, 62, 0.4); }
-.btn-download:disabled { background-color: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-download:disabled { background-color: #cbd5e1; cursor: not-allowed; }
 .spinner {
   border: 3px solid rgba(255,255,255,0.3); border-radius: 50%;
   border-top: 3px solid white; width: 20px; height: 20px; animation: spin 1s linear infinite;

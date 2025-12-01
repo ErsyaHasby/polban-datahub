@@ -69,14 +69,19 @@ export default {
   setup() { return { authStore: useAuthStore() } },
   data() {
     return {
-      isSidebarOpen: true,
+      // === REVISI: BACA MEMORI BROWSER ===
+      isSidebarOpen: localStorage.getItem('sidebarState') === 'closed' ? false : true,
       loading: false,
       logs: []
     }
   },
   mounted() { this.fetchLogs() },
   methods: {
-    toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen },
+    // === REVISI: SIMPAN STATUS ===
+    toggleSidebar() { 
+      this.isSidebarOpen = !this.isSidebarOpen;
+      localStorage.setItem('sidebarState', this.isSidebarOpen ? 'open' : 'closed');
+    },
     async fetchLogs() {
       this.loading = true;
       try {
@@ -99,33 +104,28 @@ export default {
 
 <style scoped>
 /* Reuse Style dari AdminReview agar konsisten */
-.dashboard-layout { display: flex; min-height: 100vh; background: #f3f4f6; font-family: 'Inria Sans', sans-serif; }
+.dashboard-layout { display: flex; flex-direction: column; min-height: 100vh; background: #f3f4f6; font-family: 'Inria Sans', sans-serif; }
 .main-wrapper { display: flex; flex: 1; padding-top: 80px; }
 
-/* === PERBAIKAN FOOTER === */
+/* === PERBAIKAN LAYOUT MINI SIDEBAR === */
 .page-content { 
   flex: 1; 
   margin-left: 280px; 
-  /* Hapus padding dari sini agar footer bisa full width jika mau, atau tetap rapi */
-  /* padding: 2rem;  <-- DIHAPUS DIPINDAH KE BAWAH */
   transition: margin-left 0.3s ease;
-  
-  /* Tambahan Wajib Flex Column */
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 80px);
 }
 
-.page-content.full-width { margin-left: 0; }
+/* MARGIN 90px saat tertutup (PENTING) */
+.page-content.full-width { margin-left: 90px; }
 
 .content-container { 
   max-width: 1200px; 
   margin: 0 auto;
-  
-  /* Tambahan Wajib untuk Dorong Footer */
   flex: 1;
   width: 100%;
-  padding: 2rem; /* Padding dipindah ke sini */
+  padding: 2rem;
 }
 /* ======================== */
 

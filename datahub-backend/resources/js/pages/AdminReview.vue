@@ -7,6 +7,7 @@
 
       <main class="page-content" :class="{ 'full-width': !isSidebarOpen }">
         <div class="content-container">
+          
           <div class="page-header">
             <h1 class="page-title">Riwayat Import Data</h1>
             <p class="page-subtitle">Kelola semua riwayat upload dari participant</p>
@@ -80,40 +81,24 @@
           </div>
           <button @click="closeModal" class="btn-close">✕</button>
         </div>
-        
         <div class="modal-body scrollable">
           <table class="preview-table">
             <thead>
               <tr>
-                <th>Kelas</th>
-                <th>Angkatan</th>
-                <th>Tgl Lahir</th>
-                <th>JK</th>
-                <th>Agama</th>
-                <th>Kode Pos</th>
-                <th>SLTA</th>
-                <th>Jalur</th>
-                <th>Wilayah</th>
-                <th>Provinsi</th>
+                <th>Kelas</th><th>Angkatan</th><th>Tgl Lahir</th><th>JK</th><th>Agama</th>
+                <th>Kode Pos</th><th>SLTA</th><th>Jalur</th><th>Wilayah</th><th>Provinsi</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="row in rows" :key="row.import_id">
-                <td>{{ row.kelas }}</td>
-                <td>{{ row.angkatan }}</td>
-                <td>{{ row.tgl_lahir }}</td>
-                <td>{{ row.jenis_kelamin }}</td>
-                <td>{{ row.agama }}</td>
-                <td>{{ row.kode_pos }}</td>
-                <td>{{ row.nama_slta_raw }}</td>
-                <td>{{ row.nama_jalur_daftar_raw }}</td>
-                <td>{{ row.nama_wilayah_raw }}</td>
-                <td>{{ row.provinsi_raw }}</td>
+                <td>{{ row.kelas }}</td><td>{{ row.angkatan }}</td><td>{{ row.tgl_lahir }}</td>
+                <td>{{ row.jenis_kelamin }}</td><td>{{ row.agama }}</td><td>{{ row.kode_pos }}</td>
+                <td>{{ row.nama_slta_raw }}</td><td>{{ row.nama_jalur_daftar_raw }}</td>
+                <td>{{ row.nama_wilayah_raw }}</td><td>{{ row.provinsi_raw }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-
         <div class="modal-footer">
           <button @click="showRejectInput = true" class="btn-danger">Tolak File</button>
           <button @click="approveBatch" class="btn-primary">Setujui File</button>
@@ -147,13 +132,20 @@ export default {
   setup() { return { authStore: useAuthStore() } },
   data() {
     return {
-      isSidebarOpen: true, loading: false, files: [], 
-      detailModal: null, rows: [], showRejectInput: false, rejectNotes: ''
+      // === REVISI: BACA MEMORI BROWSER AGAR TIDAK MEMBESAR SENDIRI ===
+      isSidebarOpen: localStorage.getItem('sidebarState') === 'closed' ? false : true,
+      
+      loading: false, files: [], detailModal: null, rows: [], showRejectInput: false, rejectNotes: ''
     }
   },
   mounted() { this.fetchPending() },
   methods: {
-    toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen },
+    // === REVISI: SIMPAN STATUS SAAT KLIK GARIS TIGA ===
+    toggleSidebar() { 
+      this.isSidebarOpen = !this.isSidebarOpen;
+      localStorage.setItem('sidebarState', this.isSidebarOpen ? 'open' : 'closed');
+    },
+    
     async fetchPending() {
       this.loading = true;
       this.files = [];
@@ -232,32 +224,28 @@ export default {
 
 <style scoped>
 /* Style Konsisten */
-.dashboard-layout { display: flex; min-height: 100vh; background: #f3f4f6; font-family: 'Inria Sans', sans-serif; }
-.main-wrapper { display: flex; flex: 1; padding-top: 80px; }
+.dashboard-layout { display: flex; flex-direction: column; min-height: 100vh; background: #f3f4f6; font-family: 'Inria Sans', sans-serif; }
+.main-wrapper { display: flex; flex: 1; padding-top: 90px; }
 
-/* === PERBAIKAN FOOTER === */
+/* === PERBAIKAN LAYOUT MINI SIDEBAR === */
 .page-content { 
   flex: 1; 
   margin-left: 280px; 
-  /* padding: 2rem; <-- DIHAPUS DIPINDAH KE CONTAINER */
   transition: margin-left 0.3s ease;
-  
-  /* Flex Column agar Footer di bawah */
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh - 90px);
 }
 
-.page-content.full-width { margin-left: 0; }
+/* MARGIN 90px saat tertutup (PENTING) */
+.page-content.full-width { margin-left: 90px; }
 
 .content-container { 
   max-width: 1200px; 
   margin: 0 auto;
-  
-  /* Flex Grow agar konten mengisi ruang */
   flex: 1;
   width: 100%;
-  padding: 2rem; /* Padding dipindah ke sini */
+  padding: 2rem;
 }
 /* ======================== */
 
