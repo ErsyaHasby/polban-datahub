@@ -99,11 +99,26 @@ export default {
 .content-container {
   padding: 2rem 4rem; 
   flex: 1; 
-  background: #f8fafc;
+  background: var(--bg);
 }
 
 .welcome-header { margin-bottom: 2rem; }
-.welcome-header h1 { color: #1B2376; font-size: 3rem; font-weight: 700; margin-bottom: 0.5rem; }
+.welcome-header h1 {
+  color: #1B2376; /* BIRU untuk mode terang */
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
 .highlight-name { color: #F6983E; }
 .page-subtitle { color: #64748b; font-size: 1.2rem; margin-top: 0.5rem; }
+
+/* Mode gelap override */
+.dark-theme .welcome-header h1,
+.dark-theme .page-title,
+.dark-theme .highlight-name {
+  color: var(--text);
+}
+.dark-theme .page-subtitle {
+  color: var(--muted);
+}
 </style>

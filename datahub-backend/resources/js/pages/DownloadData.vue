@@ -118,7 +118,7 @@ export default {
 .dashboard-layout {
   font-family: 'Inria Sans', sans-serif;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--bg);
   display: flex; flex-direction: column;
 }
 .main-wrapper { display: flex; padding-top: 90px; flex: 1; min-height: 100vh; }
@@ -136,13 +136,13 @@ export default {
 .content-container { padding: 2rem 4rem; flex: 1; width: 100%; }
 
 .page-header { display: flex; justify-content: space-between; margin-bottom: 2rem; }
-.page-title { color: #1B2376; font-size: 2rem; font-weight: 700; margin: 0; }
-.page-subtitle { color: #64748b; margin-top: 0.2rem; font-size: 1rem; }
-.breadcrumb { font-size: 0.9rem; color: #94a3b8; font-weight: 600; }
-.breadcrumb .active { color: #1B2376; }
+.page-title { color: var(--text); font-size: 2rem; font-weight: 700; margin: 0; }
+.page-subtitle { color: var(--muted); margin-top: 0.2rem; font-size: 1rem; }
+.breadcrumb { font-size: 0.9rem; color: var(--muted); font-weight: 600; }
+.breadcrumb .active { color: var(--text); }
 
 .download-card {
-  background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  background: var(--surface); border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
   display: flex; overflow: hidden; min-height: 400px;
 }
 .card-left {
@@ -160,25 +160,55 @@ export default {
 }
 .filter-form { display: flex; flex-direction: column; gap: 1.5rem; }
 .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
-.form-group label { color: #1B2376; font-weight: 700; font-size: 1rem; }
+.form-group label { color: var(--text); font-weight: 700; font-size: 1rem; }
 
 .single-search-wrapper { display: flex; align-items: center; position: relative; }
-.input-icon { position: absolute; left: 1rem; color: #94a3b8; pointer-events: none; }
+.input-icon { position: absolute; left: 1rem; color: var(--muted); pointer-events: none; }
 .form-input-single {
   width: 100%; padding: 1rem 1rem 1rem 3rem;
   border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit;
   font-size: 1.1rem; transition: border-color 0.3s; outline: none;
+  background: var(--surface); color: var(--text);
 }
-.form-input-single:focus { border-color: #F6983E; }
+.form-input-single:focus { border-color: var(--accent); }
 
 .btn-download {
-  margin-top: 1rem; background-color: #F6983E; color: white; border: none;
-  padding: 1rem; border-radius: 10px; font-weight: 700; font-size: 1.1rem;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  gap: 0.8rem; transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 1rem;
+  background-color: #1B2376; /* BIRU untuk mode terang */
+  color: #fff;
+  border: none;
+  padding: 1rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-.btn-download:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 152, 62, 0.4); }
-.btn-download:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+.btn-download:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(27, 35, 118, 0.25); /* Biru shadow */
+}
+.btn-download:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+/* Mode gelap: tombol oranye, background card gelap */
+.dark-theme .btn-download {
+  background-color: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: 0 5px 15px rgba(255, 122, 0, 0.18);
+}
+.dark-theme .download-card {
+  background: #232323;
+}
+.dark-theme .card-right label {
+  color: var(--text);
+}
 .spinner {
   border: 3px solid rgba(255,255,255,0.3); border-radius: 50%;
   border-top: 3px solid white; width: 20px; height: 20px; animation: spin 1s linear infinite;

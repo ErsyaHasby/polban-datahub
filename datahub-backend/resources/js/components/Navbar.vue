@@ -46,28 +46,33 @@ export default {
   data() {
     return {
       showDropdown: false,
-      // Cek preferensi tema dari localStorage
-      isDarkMode: localStorage.getItem('theme') === 'dark'
+      isDarkMode: false
     }
   },
   methods: {
     toggleDropdown() { this.showDropdown = !this.showDropdown; },
     toggleTheme() {
       this.isDarkMode = !this.isDarkMode;
-      // Logika ganti tema (biasanya menambah class 'dark' ke html tag)
       if (this.isDarkMode) {
-        document.documentElement.classList.add('dark');
+        document.documentElement.classList.add('dark-theme');
         localStorage.setItem('theme', 'dark');
       } else {
-        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.remove('dark-theme');
         localStorage.setItem('theme', 'light');
       }
     }
   },
   mounted() {
-    // Terapkan tema saat load
+    // Deteksi preferensi user atau sistem
+    let theme = localStorage.getItem('theme');
+    if (!theme) {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    this.isDarkMode = theme === 'dark';
     if (this.isDarkMode) {
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add('dark-theme');
+    } else {
+      document.documentElement.classList.remove('dark-theme');
     }
   }
 }

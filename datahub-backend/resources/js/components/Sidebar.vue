@@ -92,7 +92,7 @@ export default {
 .sidebar {
   font-family: 'Inria Sans', sans-serif;
   width: 280px; 
-  background: white; 
+  background: var(--surface); 
   height: calc(100vh - 90px); 
   position: fixed; top: 90px; left: 0;
   padding: 2rem 1.2rem;

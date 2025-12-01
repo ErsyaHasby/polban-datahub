@@ -9,3 +9,24 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* ====== VARIABEL TEMA GELAP ====== */
+.dark-theme {
+    --bg: #181818;
+    --surface: #232323;
+    --text: #ffb85c;
+    --muted: #ffcc9a;
+    --accent: #ff7a00;
+    --accent-contrast: #000;
+    --btn-bg: var(--accent);
+    --btn-text: var(--accent-contrast);
+}
+
+/* Terapkan variabel ke elemen dasar hanya saat dark-theme aktif */
+.dark-theme,
+.dark-theme body,
+.dark-theme html {
+    background-color: var(--bg) !important;
+    color: var(--text) !important;
+    transition: background-color .25s, color .25s;
+}

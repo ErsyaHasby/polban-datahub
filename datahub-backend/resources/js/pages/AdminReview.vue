@@ -224,7 +224,7 @@ export default {
 
 <style scoped>
 /* Style Konsisten */
-.dashboard-layout { display: flex; flex-direction: column; min-height: 100vh; background: #f3f4f6; font-family: 'Inria Sans', sans-serif; }
+.dashboard-layout { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg); font-family: 'Inria Sans', sans-serif; }
 .main-wrapper { display: flex; flex: 1; padding-top: 90px; }
 
 /* === PERBAIKAN LAYOUT MINI SIDEBAR === */
@@ -249,16 +249,25 @@ export default {
 }
 /* ======================== */
 
-.page-title { font-size: 1.8rem; font-weight: 700; color: #111827; }
-.page-subtitle { color: #6b7280; font-size: 1rem; }
-.table-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
+.page-title { font-size: 1.8rem; font-weight: 700; color: var(--text); }
+.page-subtitle { color: var(--muted); font-size: 1rem; }
+.table-card { background: var(--surface); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
 .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
 .custom-table th { background: #f9fafb; color: #374151; font-weight: 600; padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb; text-transform: uppercase; font-size: 0.8rem; }
-.custom-table td { padding: 1rem 1.5rem; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+.custom-table td { padding: 1rem 1.5rem; border-bottom: 1px solid #f3f4f6; vertical-align: middle; background: #fff; }
+/* Mode gelap: baris tabel gelap, teks oranye tetap terbaca */
+.dark-theme .custom-table td {
+  background: #181818;
+  color: var(--text);
+}
+.dark-theme .custom-table th {
+  background: #232323;
+  color: #fff;
+}
 .user-cell { display: flex; align-items: center; gap: 10px; }
 .avatar-circle { width: 32px; height: 32px; background: #1B2376; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 .font-bold { font-weight: 600; }
-.text-dark { color: #111827; font-weight: 500; }
+.text-dark { color: var(--text); font-weight: 500; }
 .state-empty { padding: 3rem; text-align: center; color: #9ca3af; font-style: italic; }
 
 .action-cell { text-align: center; display: flex; justify-content: center; gap: 8px; }
@@ -271,13 +280,13 @@ export default {
 .badge-warning { background-color: #fff7ed; color: #9a3412; }
 
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-card.large { width: 95%; max-width: 1100px; height: 85vh; background: white; border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; }
-.modal-card.small { width: 400px; background: white; border-radius: 12px; padding: 1.5rem; }
+.modal-card.large { width: 95%; max-width: 1100px; height: 85vh; background: var(--surface); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; }
+.modal-card.small { width: 400px; background: var(--surface); border-radius: 12px; padding: 1.5rem; }
 .modal-body.scrollable { flex: 1; overflow-y: auto; margin-top: 1rem; border: 1px solid #eee; }
 .preview-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
 .preview-table th { position: sticky; top: 0; background: #e2e8f0; padding: 8px; text-align: left; }
-.preview-table td { padding: 6px 8px; border-bottom: 1px solid #eee; background: white; }
-.btn-primary { background: #1B2376; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
+.preview-table td { padding: 6px 8px; border-bottom: 1px solid #eee; background: var(--surface); }
+.btn-primary { background: var(--btn-bg); color: var(--btn-text); padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
 .btn-danger { background: #ef4444; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
 .btn-secondary { background: #e5e7eb; color: #374151; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
 .form-textarea { width: 100%; border: 1px solid #d1d5db; padding: 0.5rem; border-radius: 6px; min-height: 100px; margin-top: 10px; font-family: inherit; }

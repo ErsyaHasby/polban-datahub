@@ -104,7 +104,7 @@ export default {
 
 <style scoped>
 /* Reuse Style dari AdminReview agar konsisten */
-.dashboard-layout { display: flex; flex-direction: column; min-height: 100vh; background: #f3f4f6; font-family: 'Inria Sans', sans-serif; }
+.dashboard-layout { display: flex; flex-direction: column; min-height: 100vh; background: var(--bg); font-family: 'Inria Sans', sans-serif; }
 .main-wrapper { display: flex; flex: 1; padding-top: 80px; }
 
 /* === PERBAIKAN LAYOUT MINI SIDEBAR === */
@@ -129,17 +129,38 @@ export default {
 }
 /* ======================== */
 
-.page-title { font-size: 1.8rem; font-weight: 700; color: #111827; margin-bottom: 0.2rem; }
-.page-subtitle { color: #6b7280; font-size: 1rem; margin-bottom: 2rem; }
+.page-title { font-size: 1.8rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+.page-subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
 
-.table-card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
+.table-card { background: var(--surface); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
 .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
 .custom-table th { background: #f9fafb; color: #374151; font-weight: 600; padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb; text-transform: uppercase; font-size: 0.8rem; }
-.custom-table td { padding: 1rem 1.5rem; border-bottom: 1px solid #f3f4f6; color: #4b5563; vertical-align: middle; }
+.custom-table td { 
+  padding: 1rem 1.5rem; 
+  border-bottom: 1px solid #f3f4f6; 
+  color: #4b5563; 
+  vertical-align: middle; 
+  background: #fff; 
+}
+
+/* Mode gelap: baris tabel gelap, teks oranye tetap terbaca */
+.dark-theme .custom-table td {
+  background: #181818;
+  color: var(--text);
+}
+.dark-theme .custom-table th {
+  background: #232323;
+  color: var(--muted);
+}
+.dark-theme .code-text {
+  color: var(--accent);
+  background: #232323;
+}
+
 .state-loading, .state-empty { padding: 3rem; text-align: center; color: #9ca3af; font-style: italic; }
 
 .font-bold { font-weight: 600; }
-.text-dark { color: #111827; }
+.text-dark { color: var(--text); }
 .badge-role { background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: bold; }
 .action-tag { font-weight: bold; color: #1B2376; display: block; margin-bottom: 2px; font-size: 0.85rem; }
 .desc-text { margin: 0; font-size: 0.9rem; line-height: 1.4; }
