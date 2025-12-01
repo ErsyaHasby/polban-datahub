@@ -17,7 +17,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:datacore')->group(function () 
     {
         Route::get('/datacore/mahasiswa', [DataController::class, 'dataMahasiswa']);
-        Route::get('/datacore/akademik', [DataController::class, 'dataAkademik']);
     });    
     // PARTICIPANT
     Route::middleware('role:participant')->group(function () 
