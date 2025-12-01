@@ -6,23 +6,18 @@ use App\Models\ImportMahasiswa;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;   // Penting untuk grouping
-use Illuminate\Support\Str;          // Penting untuk UUID
+use Illuminate\Support\Facades\DB;   
+use Illuminate\Support\Str;         
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class ImportController extends Controller
+class ParticipantController extends Controller
 {
     protected $activityLogService;
-
     public function __construct(ActivityLogService $activityLogService)
     {
         $this->activityLogService = $activityLogService;
     }
-
-    /**
-     * Get User's Upload History (Grouped by Batch/File)
-     * Perbaikan: Menggunakan GROUP BY agar tampilan tidak double-double per baris
-     */
+    /*Get User's Upload History (Grouped by Batch/File)*/
     public function myUploads(Request $request)
     {
         $uploads = DB::table('import_mahasiswa')
@@ -41,10 +36,7 @@ class ImportController extends Controller
         return response()->json(['data' => $uploads]);
     }
 
-    /**
-     * Store imported data
-     * Perbaikan: Skip kolom index 0 (No) dan perbaikan parameter Log
-     */
+    /*Store imported data Perbaikan: Skip kolom index 0 (No) dan perbaikan parameter Log*/
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

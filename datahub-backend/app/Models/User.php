@@ -12,7 +12,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasApiTokens;
 
     protected $table = 'users';
-    protected $primaryKey = 'user_id'; // Primary key Anda 'user_id'
+    protected $primaryKey = 'user_id';
     public $timestamps = false; 
 
     protected $fillable = [
@@ -32,13 +32,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // --- TAMBAHAN PENTING (ACCESSOR) ---
     // Ini membuat $user->id otomatis mengambil nilai dari $user->user_id
     public function getIdAttribute()
     {
         return $this->user_id;
     }
-    // ------------------------------------
 
     public function imports()
     {

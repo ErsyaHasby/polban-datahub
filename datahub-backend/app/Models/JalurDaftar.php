@@ -11,7 +11,7 @@ class JalurDaftar extends Model
 
     protected $table = 'jalur_daftar';
     protected $primaryKey = 'jalur_daftar_id';
-    public $timestamps = false; // tidak ada created_at & updated_at
+    public $timestamps = false; 
 
     protected $fillable = [
         'nama_jalur_daftar',

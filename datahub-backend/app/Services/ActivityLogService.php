@@ -13,10 +13,9 @@ class ActivityLogService
      */
     public function log(string $action, string $description, int $userId, Request $request): ActivityLog
     {
-        // FIX: Menggunakan DB::raw() untuk memaksa tanda kutip pada nilai ENUM PostgreSQL.
-        return ActivityLog::create([
+       return ActivityLog::create([
             'user_id' => $userId,
-            'action' => DB::raw("'$action'"), // Memaksa Quote untuk ENUM
+            'action' => DB::raw("'$action'"),
             'description' => $description,
             'ip_address' => $request->ip(),
         ]);

@@ -11,9 +11,9 @@ use App\Models\Provinsi;
 use App\Models\ActivityLog;
 use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // WAJIB ADA
+use Illuminate\Support\Facades\DB;
 
-class AdminApprovalController extends Controller
+class AdminController extends Controller
 {
     protected $activityLogService;
 
@@ -22,15 +22,9 @@ class AdminApprovalController extends Controller
         $this->activityLogService = $activityLogService;
     }
 
-    /**
-     * Get ALL Batches (Import History)
-     * FIX: Menggunakan DB::raw() pada nilai 'archived' untuk mengatasi ENUM PostgreSQL (Error 500).
-     */
     public function getPending()
     {
         $rawRows = ImportMahasiswa::with('user')
-            // FIX: Menggunakan DB::raw() untuk memaksa quoting pada nilai 'archived'
-            //->where('status', '!=', DB::raw("'archived'")) 
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -41,31 +35,24 @@ class AdminApprovalController extends Controller
                 'batch_id' => $first->batch_id,
                 'filename' => $first->filename,
                 'created_at' => $first->created_at,
-                'total_rows' => $rows->count(),
-                
+                'total_rows' => $rows->count(),                
                 // Menggunakan optional() untuk menghindari crash jika relasi User null
-                'user_name' => optional($first->user)->name ?? 'Unknown User', 
-                
+                'user_name' => optional($first->user)->name ?? 'Unknown User',                 
                 'status' => $first->status, 
                 'admin_notes' => $first->admin_notes,
             ];
         })->values();
-
         return response()->json(['data' => $batches]);
     }
 
-    /**
-     * Get Detail Rows of a Batch (Untuk Review)
-     */
+    /*Get Detail Rows of a Batch (Untuk Review)*/
     public function getDetail($batch_id)
     {
         $rows = ImportMahasiswa::where('batch_id', $batch_id)->get();
         return response()->json(['data' => $rows]);
     }
 
-    /**
-     * Get Activity Logs
-     */
+    /*Get Activity Logs*/
     public function getLogs()
     {
         $logs = ActivityLog::with('user')
@@ -75,20 +62,15 @@ class AdminApprovalController extends Controller
         return response()->json(['data' => $logs]);
     }
 
-    /**
-     * Approve ALL rows in a Batch
-     */
     public function approve(Request $request, $batch_id)
     {
         $importRows = ImportMahasiswa::where('batch_id', $batch_id)->get();
-
         if ($importRows->isEmpty()) return response()->json(['message' => 'Data import tidak ditemukan'], 404);
-        if ($importRows->first()->status !== 'pending') return response()->json(['message' => 'File ini sudah diproses sebelumnya'], 400);
-        
+        if ($importRows->first()->status !== 'pending') return response()->json(['message' => 'File ini sudah diproses sebelumnya'], 400);        
         DB::beginTransaction();
         try {
-            foreach ($importRows as $import) {
-                
+            foreach ($importRows as $import) 
+            {                
                 // --- LOGIKA DATA MAPPING & MATCHING ---
                 $raw_jk = trim(strtolower($import->jenis_kelamin));
                 $mapped_jk = match ($raw_jk) {
@@ -145,10 +127,10 @@ class AdminApprovalController extends Controller
             // LOGGING DIPINDAHKAN KELUAR DARI TRANSAKSI
             try {
                 $this->activityLogService->log('approve_batch', "Approved batch {$batch_id}", auth()->id(), $request);
-            } catch (\Exception $logE) {
-                // Ignore log error
+            } catch (\Exception $logE) 
+            {
+                
             }
-
             return response()->json(['message' => 'File berhasil disetujui dan data masuk ke database utama.'], 200);
 
         } catch (\Exception $e) {
@@ -161,9 +143,7 @@ class AdminApprovalController extends Controller
         }
     }
 
-    /**
-     * Reject ALL rows in a Batch
-     */
+    /*Reject ALL rows in a Batch*/
     public function reject(Request $request, $batch_id)
     {
         $request->validate(['notes' => 'required|string']);
@@ -186,15 +166,12 @@ class AdminApprovalController extends Controller
         }
     }
     
-    /**
-     * Delete a Batch (Manual Archiving)
-     */
+    /* Delete a Batch (Manual Archiving)*/
     public function deleteBatch(Request $request, $batch_id)
     {
         if (auth()->user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-
         // Ubah status menjadi 'archived' (Soft Delete untuk Admin View)
         $updatedCount = ImportMahasiswa::where('batch_id', $batch_id)
             ->update(['status' => 'archived']);
@@ -206,5 +183,86 @@ class AdminApprovalController extends Controller
         $this->activityLogService->log('delete_batch', "Archived import batch {$batch_id} (Admin Delete)", auth()->id(), $request);
         
         return response()->json(['message' => 'Batch berhasil diarsipkan dan disembunyikan.'], 200);
+    }
+
+    //memfilter data sesuai status approved dan per bacth id
+    public function getApprovedBatches()
+    {
+        // Ambil batch_id unik yang sudah di-approve
+        $approvedBatches = ImportMahasiswa::select('batch_id')
+            ->selectRaw("MAX(filename) as filename")
+            ->selectRaw("MAX(created_at) as created_at")
+            ->where('status', 'approved')
+            ->groupBy('batch_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return response()->json(['data' => $approvedBatches]);
+    }
+
+    /*Export data Mahasiswa final berdasarkan batch_id.*/
+    public function exportByBatch(Request $request, $batch_id)
+    {
+        // Cari data final MAHASISWA yang import_id-nya sesuai batch_id
+        $mahasiswa = Mahasiswa::whereHas('import', function ($query) use ($batch_id) {
+            $query->where('batch_id', $batch_id);
+        })
+        ->with(['slta', 'jalurDaftar', 'wilayah.provinsi']) 
+        ->get();
+
+        if ($mahasiswa->isEmpty()) 
+        {
+            return response()->json(['message' => 'Tidak ada data Mahasiswa yang disetujui untuk Batch ID tersebut.'], 404);
+        }
+
+        // Persiapan File CSV
+        $filename = 'data_mahasiswa_batch_' . $batch_id . '_' . now()->format('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        // Logika Pembuatan File CSV (Menggunakan relasi untuk data yang lebih kaya)
+        $callback = function() use ($mahasiswa) {
+            $file = fopen('php://output', 'w');
+
+            // Header Kolom (Ditambahkan detail relasi)
+            fputcsv($file, [
+                'Import ID', 'Nama SLTA', 'Jalur Daftar', 'Wilayah', 'Provinsi', 
+                'Kelas', 'Angkatan', 'Tgl Lahir', 'Jenis Kelamin', 'Agama', 
+                'Kode Pos', 'Tanggal Approval'
+            ]);
+
+            // Isi Data
+            foreach ($mahasiswa as $m) {
+                fputcsv($file, [
+                    $m->import_id,
+                    $m->slta->nama_slta ?? '-',
+                    $m->jalurDaftar->nama_jalur_daftar ?? '-',
+                    $m->wilayah->nama_wilayah ?? '-',
+                    $m->wilayah->provinsi->nama_provinsi ?? '-',
+                    $m->kelas,
+                    $m->angkatan,
+                    $m->tgl_lahir,
+                    $m->jenis_kelamin,
+                    $m->agama,
+                    $m->kode_pos,
+                    $m->approver_at ?? '-'
+                ]);
+            }
+            fclose($file);
+        };
+
+        // Catat Aktivitas 
+        $this->activityLogService->log(
+            'export_batch', 
+            "Admin exported approved batch {$batch_id} to CSV.", 
+            auth()->id(), 
+            $request
+        );
+
+        // Kirim file sebagai response
+        return Response::stream($callback, 200, $headers);
     }
 }
