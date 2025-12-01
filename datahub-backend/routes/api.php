@@ -16,6 +16,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    // datacore
+    Route::middleware('role:datacore')->group(function () {
+        Route::get('/datacore/mahasiswa', [DataController::class, 'dataMahasiswa']);
+    });
     
     // Download Data (ExportController mengambil dari data Mahasiswa yang sudah di-approve)
     Route::get('/export-data', [ExportController::class, 'export']);
@@ -38,7 +43,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/reject/{batch_id}', [AdminApprovalController::class, 'reject']);
         
         // Action DELETE (FITUR BARU)
-        // Rute ini harus menggunakan method DELETE dan path yang sesuai.
         Route::delete('/delete-batch/{batch_id}', [AdminApprovalController::class, 'deleteBatch']); 
         
         // Logs
