@@ -28,22 +28,56 @@
             </div>
 
             <div class="card-right">
-              <form @submit.prevent="downloadData" class="filter-form">
+              <form @submit.prevent class="filter-form">
                 <div class="form-group">
                   <label>Filter Pencarian</label>
                   <div class="single-search-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="input-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                     <input 
                       type="text" v-model="searchQuery" 
-                      placeholder="Cari data" class="form-input-single"
+                      @input="onSearchChange"
+                      placeholder="Cari nama file di riwayat import" class="form-input-single"
                     >
                   </div>
                 </div>
-                <button type="submit" class="btn-download" :disabled="loading">
-                  <span v-if="loading" class="spinner"></span>
-                  <span v-else>Unduh Data Excel</span>
-                </button>
+                <!-- Hapus tombol submit global karena download per-file -->
+                <!-- ...existing code... -->
               </form>
+
+              <!-- HASIL PENCARIAN -->
+              <div style="margin-top: 1.5rem;">
+                <div v-if="filesLoading" class="state-loading">Memuat daftar file...</div>
+                <div v-else>
+                  <div v-if="files.length === 0" class="state-empty">Tidak ada file yang cocok.</div>
+                  <table v-else class="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Nama File</th>
+                        <th>Pengunggah</th>
+                        <th>Tanggal</th>
+                        <th>Status</th>
+                        <th class="text-right">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="f in files" :key="f.batch_id">
+                        <td class="font-bold text-dark">{{ f.filename }}</td>
+                        <td>{{ f.user_name }}</td>
+                        <td>{{ formatDate(f.created_at) }}</td>
+                        <td><span :class="['badge', statusClass(f.status)]">{{ f.status }}</span></td>
+                        <td class="text-right">
+                          <button class="btn-download" style="padding: .5rem .9rem; font-size:.95rem"
+                                  @click="downloadBatch(f)"
+                                  :disabled="downloadingId === f.batch_id">
+                            <span v-if="downloadingId === f.batch_id" class="spinner"></span>
+                            <span v-else>Download</span>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -68,12 +102,19 @@ export default {
       // 1. LOGIC PENTING: Baca localStorage
       isSidebarOpen: localStorage.getItem('sidebarState') === 'closed' ? false : true,
       loading: false,
-      searchQuery: '' 
+      searchQuery: '',
+      files: [],
+      filesLoading: false,
+      downloadingId: null,
+      _searchDebounce: null
     }
   },
   setup() {
     const authStore = useAuthStore()
     return { authStore }
+  },
+  mounted() {
+    this.fetchFiles()
   },
   methods: {
     // 2. LOGIC PENTING: Simpan ke localStorage
@@ -81,27 +122,79 @@ export default {
       this.isSidebarOpen = !this.isSidebarOpen;
       localStorage.setItem('sidebarState', this.isSidebarOpen ? 'open' : 'closed');
     },
-    async downloadData() {
-      this.loading = true
+    onSearchChange() {
+      clearTimeout(this._searchDebounce)
+      this._searchDebounce = setTimeout(() => this.fetchFiles(), 350)
+    },
+    async fetchFiles() {
+      this.filesLoading = true
       try {
-        const response = await axios.get('/api/export-data', {
-          params: { search: this.searchQuery }, 
-          responseType: 'blob',
-          headers: { 'Authorization': `Bearer ${this.authStore.token}` }
+        // 1) Coba ambil dari endpoint admin yang sudah ada
+        const resAdmin = await axios.get('/admin/pending-imports', {
+          params: { search: this.searchQuery || '' },
+          headers: { Authorization: `Bearer ${this.authStore.token}` }
         })
-        const url = window.URL.createObjectURL(new Blob([response.data]))
-        const link = document.createElement('a')
-        link.href = url
-        link.setAttribute('download', `Data_Mahasiswa_${new Date().getTime()}.xlsx`)
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      } catch (error) {
-        alert('Gagal mengunduh data.')
+        let list = Array.isArray(resAdmin.data?.data) ? resAdmin.data.data : []
+
+        // 2) Jika kosong, fallback ke riwayat milik participant (supaya admin tetap melihat data yang masuk)
+        if (list.length === 0) {
+          const resMine = await axios.get('/my-uploads', {
+            params: { search: this.searchQuery || '' },
+            headers: { Authorization: `Bearer ${this.authStore.token}` }
+          })
+          const mine = Array.isArray(resMine.data?.data) ? resMine.data.data : []
+          list = mine
+        }
+
+        // 3) Normalisasi field agar tabel konsisten
+        this.files = (list || []).map(it => ({
+          batch_id: it.batch_id ?? it.id ?? it.batchId,
+          filename: it.filename ?? it.file_name ?? 'unknown.csv',
+          user_name: it.user_name ?? it.user?.name ?? 'Unknown',
+          created_at: it.created_at ?? it.uploaded_at ?? new Date().toISOString(),
+          status: it.status ?? 'pending',
+          total_rows: it.total_rows ?? it.rows ?? null,
+        }))
+      } catch (e) {
+        console.error(e)
+        this.files = []
       } finally {
-        this.loading = false
+        this.filesLoading = false
       }
     },
+    async downloadBatch(file) {
+      this.downloadingId = file.batch_id
+      try {
+        const res = await axios.get(`/admin/files/${file.batch_id}/download`, {
+          responseType: 'blob',
+          headers: { 'Authorization': `Bearer ${this.authStore.token}`, 'Accept': '*/*' }
+        })
+        const blob = new Blob([res.data], { type: res.headers['content-type'] || 'application/octet-stream' })
+        let filename = file.filename?.replace(/\.(xlsx|xls|csv)$/i, '') + '.csv'
+        const disposition = res.headers?.['content-disposition']
+        if (disposition) {
+          const match = /filename\*?=(?:UTF-8'')?"?([^\";]+)"?/i.exec(disposition)
+          if (match && match[1]) filename = decodeURIComponent(match[1])
+        }
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url; a.download = filename
+        document.body.appendChild(a); a.click()
+        document.body.removeChild(a); URL.revokeObjectURL(url)
+      } catch (e) {
+        let msg = 'Gagal mengunduh file.'
+        try {
+          const data = e.response?.data
+          if (data instanceof Blob) { const t = await data.text(); try { msg = JSON.parse(t)?.message || msg } catch { msg = t || msg } }
+          else if (typeof data === 'object' && data?.message) { msg = data.message }
+        } catch {}
+        alert(msg)
+      } finally {
+        this.downloadingId = null
+      }
+    },
+    statusClass(s) { if(s==='approved') return 'badge-success'; if(s==='rejected') return 'badge-danger'; return 'badge-warning' },
+    formatDate(d) { return new Date(d).toLocaleDateString('id-ID',{ day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) },
     async logout() {
       if (confirm('Logout?')) {
         await this.authStore.logout()
@@ -214,4 +307,10 @@ export default {
   border-top: 3px solid white; width: 20px; height: 20px; animation: spin 1s linear infinite;
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.custom-table { width: 100%; border-collapse: collapse; text-align: left; }
+.custom-table th { background-color: #f9fafb; color: #374151; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; padding: .8rem 1rem; border-bottom: 1px solid #e5e7eb; }
+.custom-table td { padding: .8rem 1rem; border-bottom: 1px solid #f3f4f6; color: #4b5563; font-size: .95rem; vertical-align: middle; background: #fff; }
+.state-loading, .state-empty { padding: 1rem 0; color: #9ca3af; font-style: italic; }
+.text-right { text-align: right; }
 </style>
