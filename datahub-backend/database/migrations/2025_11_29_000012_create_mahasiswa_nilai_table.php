@@ -8,12 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('ip', function (Blueprint $table) {
-            $table->id('ip_id');
+        Schema::create('nilai_mahasiswa', function (Blueprint $table) {
+            $table->id('nilai_id');
 
             // FK mahasiswa
             $table->foreignId('mahasiswa_id')
                 ->constrained('mahasiswa', 'mahasiswa_id')
+                ->restrictOnDelete();
+
+            // FK mata kuliah (string PK)
+            $table->string('kode_mk', 8);
+            $table->foreign('kode_mk')
+                ->references('kode_mk')
+                ->on('mata_kuliah')
                 ->restrictOnDelete();
 
             // FK periode
@@ -21,14 +28,15 @@ return new class extends Migration
                 ->constrained('periode', 'periode_id')
                 ->restrictOnDelete();
 
-            // Boleh NULL hanya ip_semester
-            $table->decimal('ip_semester', 3, 2)->nullable();
-            $table->decimal('ipk', 3, 2);
+            // ENUM nilai
+            $table->rawColumn('nilai_huruf', 'nilai_huruf_enum');
+
+            $table->unique(['mahasiswa_id', 'kode_mk', 'periode_id'], 'unique_nilai_per_periode');//tambahan
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('ip');
+        Schema::dropIfExists('nilai_mahasiswa');
     }
 };
