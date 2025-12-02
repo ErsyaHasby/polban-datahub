@@ -15,7 +15,7 @@ class DataController extends Controller
         $this->activityLogService = $activityLogService;
     }
 
-    public function dataMahasiswa()
+    public function dataMahasiswa(Request $request)
     {
         $mahasiswa = Mahasiswa::with(['slta', 'jalurDaftar','wilayah', 'provinsi' ])->get();
         $this->activityLogService->log(
@@ -30,7 +30,7 @@ class DataController extends Controller
         ], 200);
     }
 
-    public function dataAkademik()
+    public function dataAkademik(Request $request)
     {
         $akademik = MahasiswaNilai::with([
             'nilaiMahasiswa' => function ($query) {

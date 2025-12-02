@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ParticipantController;
 use App\Http\Controllers\AdminController; 
+use App\Http\Controllers\DataController; 
 
 // Rute Publik
 Route::post('/login', [AuthController::class, 'login']);
