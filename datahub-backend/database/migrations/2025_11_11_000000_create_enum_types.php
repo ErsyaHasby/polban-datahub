@@ -38,7 +38,7 @@ return new class extends Migration
 
         // ENUM untuk activity log
         $actions = "'login', 'logout', 'login_failed', 'import_data', 'export_data', 'approve_data', 'reject_data', 'create_user', 'update_user', 'approve_batch', 
-            'reject_batch'";
+            'reject_batch','get_mahasiswa_data', 'get_akademik_data'";
         DB::statement("DO $$ BEGIN
             CREATE TYPE action_log_enum AS ENUM ($actions);
         EXCEPTION

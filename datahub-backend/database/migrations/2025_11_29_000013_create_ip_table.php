@@ -13,7 +13,7 @@ return new class extends Migration
 
             // FK mahasiswa
             $table->foreignId('mahasiswa_id')
-                ->constrained('mahasiswa', 'mahasiswa_id')
+                ->constrained('mahasiswa_akademik', 'mahasiswa_id')
                 ->restrictOnDelete();
 
             // FK periode
