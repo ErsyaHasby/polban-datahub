@@ -7,6 +7,7 @@ import AdminLogs from '../pages/AdminLogs.vue'
 import NotFound from '../pages/NotFound.vue'
 import DownloadData from '../pages/DownloadData.vue'
 import MyUploads from '../pages/MyUploads.vue'
+import ImportDataPage from '../pages/ImportDataPage.vue'
 
 const routes = [
     {
@@ -16,16 +17,22 @@ const routes = [
         meta: { guest: true }
     },
     {
-    path: '/my-uploads',
-    name: 'my-uploads',
-    component: MyUploads,
-    meta: { requiresAuth: true, role: 'participant' }
-    },
-    {
         path: '/',
         name: 'dashboard',
         component: Dashboard,
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/my-uploads',
+        name: 'my-uploads',
+        component: MyUploads,
+        meta: { requiresAuth: true, role: 'participant' }
+    },
+    {
+        path: '/import-data',
+        name: 'import-data',
+        component: ImportDataPage,
+        meta: { requiresAuth: true, role: 'participant' } 
     },
     {
         path: '/admin/review',
@@ -40,16 +47,16 @@ const routes = [
         meta: { requiresAuth: true, role: 'admin' }
     },
     {
+        path: '/download-data',
+        name: 'download-data',
+        component: DownloadData,
+        meta: { requiresAuth: true } 
+    },
+    {
         path: '/:pathMatch(.*)*',
         name: 'not-found',
         component: NotFound
     },
-    {
-        path: '/download-data',
-        name: 'download-data',
-        component: DownloadData,
-        meta: { requiresAuth: true } // Semua user login bisa akses
-    }
 ]
 
 const router = createRouter({
@@ -57,29 +64,32 @@ const router = createRouter({
     routes,
 })
 
-// Navigation Guard
-router.beforeEach(async (to, from, next) => {
+// === STRICT NAVIGATION GUARD ===
+router.beforeEach((to, from, next) => {
     const authStore = useAuthStore()
 
-    // Initialize auth on first load (wait for it to complete)
-    if (!authStore.user && authStore.token) {
-        await authStore.fetchUser()
-    }
-
+    // Cek apakah halaman butuh login
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-    const guestOnly = to.matched.some(record => record.meta.guest)
+    const guestOnly = to.matched.some(record => record.meta.guest) // Halaman Login
     const requiredRole = to.meta.role
 
+    // KARENA TOKEN TIDAK DISIMPAN DI LOCALSTORAGE:
+    // Saat refresh, authStore.isLoggedIn otomatis FALSE.
+    
     if (requiresAuth && !authStore.isLoggedIn) {
-        // Redirect to login if not authenticated
+        // Jika butuh login tapi belum login -> Tendang ke Login
         next({ name: 'login' })
-    } else if (guestOnly && authStore.isLoggedIn) {
-        // Redirect to dashboard if already logged in
+    } 
+    else if (guestOnly && authStore.isLoggedIn) {
+        // Jika halaman login tapi sudah login -> Tendang ke Dashboard
         next({ name: 'dashboard' })
-    } else if (requiredRole && authStore.user?.role !== requiredRole) {
-        // Redirect to dashboard if role doesn't match
+    } 
+    else if (requiredRole && authStore.user?.role !== requiredRole) {
+        // Jika role salah -> Tendang ke Dashboard
         next({ name: 'dashboard' })
-    } else {
+    } 
+    else {
+        // Lanjut
         next()
     }
 })

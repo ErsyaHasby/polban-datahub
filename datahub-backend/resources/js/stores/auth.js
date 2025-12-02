@@ -4,7 +4,7 @@ import axios from 'axios'
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
-        token: localStorage.getItem('token') || null,
+        token: null, // JANGAN BACA DARI LOCALSTORAGE
         isLoggedIn: false,
     }),
 
@@ -25,10 +25,10 @@ export const useAuthStore = defineStore('auth', {
                 this.user = response.data.user
                 this.isLoggedIn = true
 
-                // Save token to localStorage
-                localStorage.setItem('token', response.data.token)
+                // KITA HAPUS PENYIMPANAN KE LOCALSTORAGE AGAR TIDAK PERSISTEN
+                // localStorage.setItem('token', response.data.token) <--- HAPUS INI
 
-                // Set default axios header
+                // Set header untuk request selanjutnya (selama belum refresh)
                 axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`
 
                 return { success: true }
@@ -43,20 +43,17 @@ export const useAuthStore = defineStore('auth', {
         async logout() {
             const tokenToUse = this.token
 
-            // Clear state and localStorage FIRST
+            // Clear state langsung
             this.user = null
             this.token = null
             this.isLoggedIn = false
-            localStorage.removeItem('token')
             delete axios.defaults.headers.common['Authorization']
 
-            // Then call logout API (in background, don't wait)
+            // Logout API (Optional, best effort)
             if (tokenToUse) {
                 try {
                     await axios.post('/logout', {}, {
-                        headers: {
-                            Authorization: `Bearer ${tokenToUse}`,
-                        },
+                        headers: { Authorization: `Bearer ${tokenToUse}` }
                     })
                 } catch (error) {
                     console.error('Logout API error:', error)
@@ -64,6 +61,7 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
+        // Fetch User dihapus logic localStorage-nya
         async fetchUser() {
             if (!this.token) return
 
@@ -73,14 +71,7 @@ export const useAuthStore = defineStore('auth', {
                 this.user = response.data
                 this.isLoggedIn = true
             } catch (error) {
-                // Token invalid, clear state
                 this.logout()
-            }
-        },
-
-        initAuth() {
-            if (this.token) {
-                this.fetchUser()
             }
         },
     },
