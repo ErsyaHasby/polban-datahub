@@ -49,7 +49,7 @@
                 <div v-if="filesLoading" class="state-loading">Memuat daftar file...</div>
                 <div v-else>
                   <div v-if="files.length === 0" class="state-empty">Tidak ada file yang cocok.</div>
-                  <table v-else class="custom-table">
+                  <table v-else class="custom-table themed-table">
                     <thead>
                       <tr>
                         <th>Nama File</th>
@@ -84,6 +84,14 @@
         <Footer />
       </main>
     </div>
+
+    <CustomModal v-if="modalInfo" @close="modalInfo = null">
+      <template #header>Info</template>
+      <div>{{ modalInfo }}</div>
+      <template #footer>
+        <button @click="modalInfo = null" class="btn-primary">OK</button>
+      </template>
+    </CustomModal>
   </div>
 </template>
 
@@ -93,10 +101,11 @@ import { useAuthStore } from '../stores/auth'
 import Navbar from '../components/Navbar.vue'
 import Sidebar from '../components/Sidebar.vue'
 import Footer from '../components/Footer.vue'
+import CustomModal from '../components/CustomModal.vue'
 
 export default {
   name: 'DownloadData',
-  components: { Navbar, Sidebar, Footer },
+  components: { Navbar, Sidebar, Footer, CustomModal },
   data() {
     return {
       // 1. LOGIC PENTING: Baca localStorage
@@ -106,6 +115,7 @@ export default {
       files: [],
       filesLoading: false,
       downloadingId: null,
+      modalInfo: null,
       _searchDebounce: null
     }
   },
@@ -188,7 +198,7 @@ export default {
           if (data instanceof Blob) { const t = await data.text(); try { msg = JSON.parse(t)?.message || msg } catch { msg = t || msg } }
           else if (typeof data === 'object' && data?.message) { msg = data.message }
         } catch {}
-        alert(msg)
+        this.modalInfo = msg
       } finally {
         this.downloadingId = null
       }
@@ -309,6 +319,35 @@ export default {
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
+.custom-table.themed-table th, .custom-table.themed-table td {
+  background: #fff;
+  color: #1B2376;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.2rem;
+  transition: background 0.2s, color 0.2s;
+}
+.custom-table.themed-table th {
+  background: #f9fafb;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: left;
+}
+.custom-table.themed-table tr:hover td {
+  background: #f3f4f6;
+}
+.dark-theme .custom-table.themed-table th, 
+.dark-theme .custom-table.themed-table td {
+  background: #181818 !important;
+  color: #FF914D !important;
+  border-bottom: 1px solid #232323;
+}
+.dark-theme .custom-table.themed-table th {
+  background: #232323 !important;
+  color: #FF914D !important;
+}
+.dark-theme .custom-table.themed-table tr:hover td {
+  background: #232323 !important;
+}
 .custom-table th { background-color: #f9fafb; color: #374151; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; padding: .8rem 1rem; border-bottom: 1px solid #e5e7eb; }
 .custom-table td { padding: .8rem 1rem; border-bottom: 1px solid #f3f4f6; color: #4b5563; font-size: .95rem; vertical-align: middle; background: #fff; }
 .state-loading, .state-empty { padding: 1rem 0; color: #9ca3af; font-style: italic; }

@@ -21,6 +21,14 @@
       </main>
     </div>
     <ImportModal v-if="showImportModal" @close="showImportModal = false" />
+    <CustomModal v-if="showLogoutModal" @close="showLogoutModal = false">
+      <template #header>Konfirmasi Logout</template>
+      <div>Yakin ingin logout?</div>
+      <template #footer>
+        <button @click="showLogoutModal = false" class="btn-secondary">Batal</button>
+        <button @click="doLogout" class="btn-danger">Logout</button>
+      </template>
+    </CustomModal>
   </div>
 </template>
 
@@ -31,10 +39,11 @@ import Sidebar from '../components/Sidebar.vue'
 import Footer from '../components/Footer.vue'
 import ImportModal from '../components/ImportModal.vue'
 import ExportModal from '../components/ExportModal.vue'
+import CustomModal from '../components/CustomModal.vue'
 
 export default {
   name: 'Dashboard',
-  components: { Navbar, Sidebar, Footer, ImportModal, ExportModal },
+  components: { Navbar, Sidebar, Footer, ImportModal, ExportModal, CustomModal },
   setup() { return { authStore: useAuthStore() } },
   data() {
     return {
@@ -42,7 +51,8 @@ export default {
       isSidebarOpen: localStorage.getItem('sidebarState') === 'closed' ? false : true,
       
       showImportModal: false,
-      showExportModal: false
+      showExportModal: false,
+      showLogoutModal: false
     }
   },
   methods: {
@@ -51,11 +61,10 @@ export default {
       this.isSidebarOpen = !this.isSidebarOpen;
       localStorage.setItem('sidebarState', this.isSidebarOpen ? 'open' : 'closed');
     },
-    async logout() {
-      if (confirm('Yakin ingin logout?')) {
-        await this.authStore.logout()
-        this.$router.push({ name: 'login' })
-      }
+    async logout() { this.showLogoutModal = true; },
+    async doLogout() {
+      await this.authStore.logout()
+      this.$router.push({ name: 'login' })
     }
   }
 }

@@ -134,26 +134,35 @@ export default {
 
 .table-card { background: var(--surface); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; }
 .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
-.custom-table th { background: #f9fafb; color: #374151; font-weight: 600; padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb; text-transform: uppercase; font-size: 0.8rem; }
+.custom-table th { 
+  background: #f9fafb; 
+  color: #374151; 
+  font-weight: 600; 
+  padding: 1rem 1.5rem; 
+  border-bottom: 1px solid #e5e7eb; 
+  text-transform: uppercase; 
+  font-size: 0.8rem; 
+}
 .custom-table td { 
   padding: 1rem 1.5rem; 
   border-bottom: 1px solid #f3f4f6; 
-  color: #4b5563; 
+  color: #1B2376; 
   vertical-align: middle; 
   background: #fff; 
+  transition: background 0.2s, color 0.2s;
 }
-
-/* Mode gelap: baris tabel gelap, teks oranye tetap terbaca */
-.dark-theme .custom-table td {
-  background: #181818;
-  color: var(--text);
-}
+.custom-table tbody tr:hover td { background: #f3f4f6; }
 .dark-theme .custom-table th {
   background: #232323;
-  color: var(--muted);
+  color: #FF914D;
+  border-bottom: 1px solid #232323;
 }
-.dark-theme .code-text {
-  color: var(--accent);
+.dark-theme .custom-table td {
+  background: #181818;
+  color: #FF914D;
+  border-bottom: 1px solid #232323;
+}
+.dark-theme .custom-table tbody tr:hover td {
   background: #232323;
 }
 

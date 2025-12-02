@@ -80,7 +80,7 @@
           <button @click="closeModal" class="btn-close">✕</button>
         </div>
         <div class="modal-body scrollable">
-          <table class="preview-table">
+          <table class="preview-table themed-table">
             <thead>
               <tr>
                 <th>Kelas</th><th>Angkatan</th><th>Tgl Lahir</th><th>JK</th><th>Agama</th>
@@ -99,22 +99,39 @@
         </div>
         <div class="modal-footer">
           <button @click="showRejectInput = true" class="btn-danger">Tolak File</button>
-          <button @click="approveBatch" class="btn-primary">Setujui File</button>
+          <button @click="openApproveModal" class="btn-primary">Setujui File</button>
         </div>
       </div>
     </div>
 
-    <div v-if="showRejectInput" class="modal-backdrop z-high">
-      <div class="modal-card small">
-        <h3>Alasan Penolakan</h3>
-        <textarea v-model="rejectNotes" class="form-textarea" placeholder="Contoh: Format salah pada kolom Tanggal..."></textarea>
-        <div class="modal-footer">
-          <button @click="showRejectInput = false" class="btn-secondary">Batal</button>
-          <button @click="rejectBatch" class="btn-danger">Kirim Penolakan</button>
-        </div>
-      </div>
-    </div>
+    <!-- Modal Penolakan -->
+    <CustomModal v-if="showRejectInput" @close="showRejectInput = false">
+      <template #header>Alasan Penolakan</template>
+      <textarea v-model="rejectNotes" class="form-textarea" placeholder="Contoh: Format salah pada kolom Tanggal..."></textarea>
+      <template #footer>
+        <button @click="showRejectInput = false" class="btn-secondary">Batal</button>
+        <button @click="rejectBatch" class="btn-danger">Kirim Penolakan</button>
+      </template>
+    </CustomModal>
 
+    <!-- Modal Konfirmasi Approve -->
+    <CustomModal v-if="showApproveModal" @close="showApproveModal = false">
+      <template #header>Konfirmasi</template>
+      <div>Yakin setujui? Data akan masuk ke database utama.</div>
+      <template #footer>
+        <button @click="showApproveModal = false" class="btn-secondary">Batal</button>
+        <button @click="approveBatch" class="btn-primary">Setujui</button>
+      </template>
+    </CustomModal>
+
+    <!-- Modal Info -->
+    <CustomModal v-if="modalInfo" @close="modalInfo = null">
+      <template #header>Info</template>
+      <div>{{ modalInfo }}</div>
+      <template #footer>
+        <button @click="modalInfo = null" class="btn-primary">OK</button>
+      </template>
+    </CustomModal>
   </div>
 </template>
 
@@ -124,16 +141,19 @@ import { useAuthStore } from '../stores/auth'
 import Navbar from '../components/Navbar.vue'
 import Sidebar from '../components/Sidebar.vue'
 import Footer from '../components/Footer.vue'
+import CustomModal from '../components/CustomModal.vue'
 
 export default {
-  components: { Navbar, Sidebar, Footer },
+  components: { Navbar, Sidebar, Footer, CustomModal },
   setup() { return { authStore: useAuthStore() } },
   data() {
     return {
       // === REVISI: BACA MEMORI BROWSER AGAR TIDAK MEMBESAR SENDIRI ===
       isSidebarOpen: localStorage.getItem('sidebarState') === 'closed' ? false : true,
       
-      loading: false, files: [], detailModal: null, rows: [], showRejectInput: false, rejectNotes: ''
+      loading: false, files: [], detailModal: null, rows: [], showRejectInput: false, rejectNotes: '',
+      showApproveModal: false,
+      modalInfo: null,
     }
   },
   mounted() { this.fetchPending() },
@@ -167,23 +187,26 @@ export default {
     closeModal() {
       this.detailModal = null; this.rows = []; this.showRejectInput = false;
     },
+    openApproveModal() { this.showApproveModal = true },
     async approveBatch() {
-      if(!confirm("Yakin setujui? Data akan masuk ke database utama.")) return;
+      this.showApproveModal = false
       try {
         await axios.post(`/admin/approve/${this.detailModal.batch_id}`, {}, {
            headers: { Authorization: `Bearer ${this.authStore.token}` }
         });
-        alert("Berhasil disetujui!"); this.closeModal(); this.fetchPending();
-      } catch(e) { alert("Gagal approve: " + (e.response?.data?.message || 'Error')) }
+        this.modalInfo = "Berhasil disetujui!";
+        this.closeModal(); this.fetchPending();
+      } catch(e) { this.modalInfo = "Gagal approve: " + (e.response?.data?.message || 'Error') }
     },
     async rejectBatch() {
-      if(!this.rejectNotes) return alert("Isi alasan penolakan!");
+      if(!this.rejectNotes) { this.modalInfo = "Isi alasan penolakan!"; return }
       try {
         await axios.post(`/admin/reject/${this.detailModal.batch_id}`, { notes: this.rejectNotes }, {
            headers: { Authorization: `Bearer ${this.authStore.token}` }
         });
-        alert("File ditolak."); this.closeModal(); this.fetchPending();
-      } catch(e) { alert("Gagal reject.") }
+        this.modalInfo = "File ditolak.";
+        this.closeModal(); this.fetchPending();
+      } catch(e) { this.modalInfo = "Gagal reject." }
     },
     async deleteBatch(batchId) {
       if (!confirm(`Yakin ingin menghapus seluruh batch data ${batchId}? Aksi ini TIDAK DAPAT DIBATALKAN!`)) return;
@@ -293,13 +316,72 @@ export default {
 .badge-danger { background-color: #fee2e2; color: #991b1b; }
 .badge-warning { background-color: #fff7ed; color: #9a3412; }
 
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-card.large { width: 95%; max-width: 1100px; height: 85vh; background: var(--surface); border-radius: 12px; padding: 1.5rem; display: flex; flex-direction: column; }
+.modal-backdrop { 
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); 
+  display: flex; align-items: center; justify-content: center; z-index: 1000; 
+}
+.modal-card.large { 
+  width: 95%; max-width: 1100px; height: 85vh; 
+  background: var(--surface); border-radius: 16px; 
+  padding: 2.5rem 2rem 2rem 2rem; 
+  display: flex; flex-direction: column; 
+  box-shadow: 0 8px 40px rgba(27,35,118,0.15);
+  border: 1.5px solid #e5e7eb;
+}
 .modal-card.small { width: 400px; background: var(--surface); border-radius: 12px; padding: 1.5rem; }
-.modal-body.scrollable { flex: 1; overflow-y: auto; margin-top: 1rem; border: 1px solid #eee; }
-.preview-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-.preview-table th { position: sticky; top: 0; background: #e2e8f0; padding: 8px; text-align: left; }
-.preview-table td { padding: 6px 8px; border-bottom: 1px solid #eee; background: var(--surface); }
+.modal-body.scrollable { 
+  flex: 1; overflow-y: auto; margin-top: 1rem; 
+  border: 1px solid #e5e7eb; border-radius: 10px; 
+  background: #fff;
+  padding: 1.2rem 0.5rem;
+}
+.dark-theme .modal-card.large {
+  background: #181818;
+  border: 1.5px solid #232323;
+}
+.dark-theme .modal-body.scrollable {
+  background: #181818;
+  border-color: #232323;
+}
+.preview-table.themed-table {
+  width: 100%; border-collapse: collapse; font-size: 0.95rem;
+}
+.preview-table.themed-table th, .preview-table.themed-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+  color: #1B2376;
+  transition: background 0.2s, color 0.2s;
+}
+.preview-table.themed-table th {
+  background: #f9fafb;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.preview-table.themed-table tr:hover td {
+  background: #f3f4f6;
+}
+.dark-theme .preview-table.themed-table th, 
+.dark-theme .preview-table.themed-table td {
+  background: #181818 !important;
+  color: #FF914D !important;
+  border-bottom: 1px solid #232323;
+}
+.dark-theme .preview-table.themed-table th {
+  background: #232323 !important;
+  color: #FF914D !important;
+}
+.dark-theme .preview-table.themed-table tr:hover td {
+  background: #232323 !important;
+}
+@media (max-width: 900px) {
+  .modal-card.large { padding: 1rem 0.5rem; }
+  .modal-body.scrollable { padding: 0.5rem 0.2rem; }
+}
 .btn-primary { background: var(--btn-bg); color: var(--btn-text); padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
 .btn-danger { background: #ef4444; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }
 .btn-secondary { background: #e5e7eb; color: #374151; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; }

@@ -70,20 +70,56 @@
     </div>
 
     <div class="sidebar-footer">
-      <div class="menu-item faq-item" :title="!isOpen ? 'Bantuan' : ''">
+      <div class="menu-item faq-item" :title="!isOpen ? 'Bantuan' : ''" @click="showHelp = true" style="cursor:pointer;">
         <div class="icon-box">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
         </div>
         <span class="menu-text">Bantuan</span>
       </div>
     </div>
+    <CustomModal v-if="showHelp" @close="showHelp = false">
+      <template #header>Bantuan & FAQ</template>
+      <div class="help-content">
+        <h4>Fitur Utama</h4>
+        <ul>
+          <li><b>Import Data:</b> Upload file CSV/XLSX data mahasiswa melalui menu Import Data.</li>
+          <li><b>Riwayat Upload:</b> Lihat status file yang sudah diupload dan catatan admin.</li>
+          <li><b>Review Data (Admin):</b> Admin dapat memeriksa dan menyetujui/menolak data yang diupload.</li>
+          <li><b>Download Data:</b> Admin dapat mengunduh data yang sudah diapprove.</li>
+        </ul>
+        <h4>Status Upload File</h4>
+        <ul>
+          <li><b>Pending:</b> File sudah diupload, menunggu review dari admin.</li>
+          <li><b>Approved:</b> File sudah diperiksa dan disetujui admin, data masuk ke database utama.</li>
+          <li><b>Rejected:</b> File ditolak admin, cek catatan admin untuk alasan penolakan.</li>
+        </ul>
+        <h4>Persyaratan Import Data</h4>
+        <ul>
+          <li>Format file harus CSV, XLSX, atau XLS.</li>
+          <li>Ukuran file maksimal 10MB.</li>
+          <li>Pastikan format kolom sesuai template yang disediakan.</li>
+        </ul>
+        <h4>Kontak Bantuan</h4>
+        <ul>
+          <li>Email: <a href="mailto:polbandatahub@gmail.com">polbandatahub@gmail.com</a></li>
+          <li>Admin WhatsApp: <a href="https://wa.me/6289652251225" target="_blank">0896-5225-1225</a></li>
+        </ul>
+      </div>
+      <!-- Footer kosong, tidak ada tombol Tutup -->
+      <template #footer></template>
+    </CustomModal>
   </aside>
 </template>
 
 <script>
+import CustomModal from './CustomModal.vue'
 export default {
   name: 'Sidebar',
-  props: { isAdmin: Boolean, isParticipant: Boolean, isOpen: Boolean }
+  props: { isAdmin: Boolean, isParticipant: Boolean, isOpen: Boolean },
+  components: { CustomModal },
+  data() {
+    return { showHelp: false }
+  }
 }
 </script>
 
@@ -146,6 +182,12 @@ export default {
 .menu-item.active:hover { transform: none; }
 
 .sidebar-footer { padding-top: 1rem; border-top: 1px solid #f1f5f9; }
-.faq-item { color: #94a3b8; cursor: default; display: flex; align-items: center; gap: 1.2rem; padding: 1rem 1.5rem; border-radius: 15px; font-weight: 700; white-space: nowrap; }
+.faq-item { color: #94a3b8; cursor: pointer; display: flex; align-items: center; gap: 1.2rem; padding: 1rem 1.5rem; border-radius: 15px; font-weight: 700; white-space: nowrap; }
 .sidebar.closed .faq-item { justify-content: center; padding: 1rem; }
+
+.help-content h4 { margin: 1rem 0 0.5rem 0; color: #FF914D; font-size: 1.1rem; }
+.help-content ul { margin: 0 0 1rem 1.2rem; padding: 0; font-size: 0.97rem; }
+.help-content li { margin-bottom: 0.4rem; }
+.help-content a { color: #1B2376; text-decoration: underline; }
+.dark-theme .help-content a { color: #FF914D; }
 </style>

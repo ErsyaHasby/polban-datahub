@@ -40,6 +40,14 @@
       </main>
     </div>
     <ImportModal v-if="showImportModal" @close="showImportModal = false" @uploaded="fetchUploads" />
+    <CustomModal v-if="showLogoutModal" @close="showLogoutModal = false">
+      <template #header>Konfirmasi Logout</template>
+      <div>Yakin ingin logout?</div>
+      <template #footer>
+        <button @click="showLogoutModal = false" class="btn-secondary">Batal</button>
+        <button @click="doLogout" class="btn-danger">Logout</button>
+      </template>
+    </CustomModal>
   </div>
 </template>
 
@@ -50,15 +58,17 @@ import Navbar from '../components/Navbar.vue'
 import Sidebar from '../components/Sidebar.vue'
 import Footer from '../components/Footer.vue'
 import ImportModal from '../components/ImportModal.vue'
+import CustomModal from '../components/CustomModal.vue'
 
 export default {
-  components: { Navbar, Sidebar, Footer, ImportModal },
+  components: { Navbar, Sidebar, Footer, ImportModal, CustomModal },
   setup() { return { authStore: useAuthStore() } },
   data() {
     return {
       // Logic localStorage
       isSidebarOpen: localStorage.getItem('sidebarState') === 'closed' ? false : true,
-      showImportModal: false, loading: false, uploads: []
+      showImportModal: false, loading: false, uploads: [],
+      showLogoutModal: false,
     }
   },
   mounted() { this.fetchUploads() },
@@ -86,7 +96,11 @@ export default {
       if(!date) return '-';
       return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour:'2-digit', minute:'2-digit' });
     },
-    async logout() { await this.authStore.logout(); this.$router.push({name:'login'}); }
+    async logout() { this.showLogoutModal = true; },
+    async doLogout() { 
+      await this.authStore.logout(); 
+      this.$router.push({name:'login'}); 
+    },
   }
 }
 </script>
@@ -108,18 +122,38 @@ export default {
 .page-subtitle { color: var(--muted); font-size: 1rem; }
 .table-card { background: var(--surface); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden; }
 .custom-table { width: 100%; border-collapse: collapse; text-align: left; }
-.custom-table th { background-color: #f9fafb; color: #374151; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; padding: 1rem 1.5rem; border-bottom: 1px solid #e5e7eb; }
-.custom-table td { padding: 1rem 1.5rem; border-bottom: 1px solid #f3f4f6; color: #4b5563; font-size: 0.95rem; vertical-align: middle; background: #fff; }
-/* Mode gelap: baris tabel gelap, teks oranye tetap terbaca */
-.dark-theme .custom-table td {
-  background: #181818;
-  color: var(--text);
+.custom-table th { 
+  background-color: #f9fafb; 
+  color: #374151; 
+  font-weight: 600; 
+  font-size: 0.875rem; 
+  text-transform: uppercase; 
+  padding: 1rem 1.5rem; 
+  border-bottom: 1px solid #e5e7eb; 
 }
+.custom-table td { 
+  padding: 1rem 1.5rem; 
+  border-bottom: 1px solid #f3f4f6; 
+  color: #1B2376; 
+  font-size: 0.95rem; 
+  vertical-align: middle; 
+  background: #fff; 
+  transition: background 0.2s, color 0.2s;
+}
+.custom-table tbody tr:hover td { background-color: #f3f4f6; }
 .dark-theme .custom-table th {
   background: #232323;
-  color: var(--muted);
+  color: #FF914D;
+  border-bottom: 1px solid #232323;
 }
-.custom-table tbody tr:hover { background-color: #f9fafb; }
+.dark-theme .custom-table td {
+  background: #181818;
+  color: #FF914D;
+  border-bottom: 1px solid #232323;
+}
+.dark-theme .custom-table tbody tr:hover td {
+  background: #232323;
+}
 .font-bold { font-weight: 600; } .text-dark { color: var(--text); } .text-red { color: #ef4444; font-style: italic; font-size: 0.9rem; }
 .state-loading, .state-empty { padding: 3rem; text-align: center; color: #9ca3af; font-style: italic; }
 .badge { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
