@@ -44,19 +44,17 @@
                     </span>
                   </td>
                   <td class="action-cell">
-                    <button 
-                      v-if="file.status === 'pending'" 
-                      @click="openReview(file)" 
-                      class="btn-action-review" 
-                      title="Review Detail">
-                      🔍 Review
-                    </button>
-                    <button 
-                      @click="deleteBatch(file.batch_id)" 
-                      class="btn-action-delete" 
-                      title="Hapus Permanen">
-                      🗑️ Hapus
-                    </button>
+                    <template v-if="file.status === 'pending'">
+                      <button 
+                        @click="openReview(file)" 
+                        class="btn-action-review" 
+                        title="Review Detail">
+                        🔍 Review
+                      </button>
+                    </template>
+                    <template v-else>
+                      <span class="reviewed-label">Sudah di review</span>
+                    </template>
                   </td>
                 </tr>
                 <tr v-if="files.length === 0">
@@ -272,7 +270,23 @@ export default {
 
 .action-cell { text-align: center; display: flex; justify-content: center; gap: 8px; }
 .btn-action-review { background: #1B2376; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
-.btn-action-delete { background: #ef4444; color: white; padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+/* Hapus style btn-action-delete jika tidak dipakai */
+/* Tambahkan style untuk label sudah di review */
+.reviewed-label {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: #e5e7eb;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: default;
+  border: none;
+}
+.dark-theme .reviewed-label {
+  background: #232323;
+  color: var(--muted);
+}
 
 .badge { padding: 4px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: capitalize; }
 .badge-success { background-color: #dcfce7; color: #166534; }

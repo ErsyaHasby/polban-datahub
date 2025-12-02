@@ -22,11 +22,30 @@
     --btn-text: var(--accent-contrast);
 }
 
+/* Transisi natural untuk background dan warna teks */
+html,
+body {
+    transition: background-color 0.4s cubic-bezier(.4, 0, .2, 1), color 0.4s cubic-bezier(.4, 0, .2, 1);
+}
+
 /* Terapkan variabel ke elemen dasar hanya saat dark-theme aktif */
 .dark-theme,
 .dark-theme body,
 .dark-theme html {
     background-color: var(--bg) !important;
     color: var(--text) !important;
-    transition: background-color .25s, color .25s;
+    /* Sudah ada transition di atas */
+}
+
+/* Tambahkan transisi pada elemen utama agar smooth */
+.dashboard-layout,
+.main-wrapper,
+.page-content,
+.content-container,
+.table-card,
+.import-card,
+.download-card,
+.sidebar,
+.main-footer {
+    transition: background-color 0.4s cubic-bezier(.4, 0, .2, 1), color 0.4s cubic-bezier(.4, 0, .2, 1), border-color 0.4s cubic-bezier(.4, 0, .2, 1);
 }
