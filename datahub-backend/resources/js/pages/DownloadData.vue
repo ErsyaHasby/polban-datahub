@@ -139,30 +139,20 @@ export default {
     async fetchFiles() {
       this.filesLoading = true
       try {
-        // 1) Coba ambil dari endpoint admin yang sudah ada
-        const resAdmin = await axios.get('/admin/pending-imports', {
+        // 1) Ambil dari endpoint approved-batches untuk data yang sudah disetujui
+        const resAdmin = await axios.get('/admin/approved-batches', {
           params: { search: this.searchQuery || '' },
           headers: { Authorization: `Bearer ${this.authStore.token}` }
         })
         let list = Array.isArray(resAdmin.data?.data) ? resAdmin.data.data : []
 
-        // 2) Jika kosong, fallback ke riwayat milik participant (supaya admin tetap melihat data yang masuk)
-        if (list.length === 0) {
-          const resMine = await axios.get('/my-uploads', {
-            params: { search: this.searchQuery || '' },
-            headers: { Authorization: `Bearer ${this.authStore.token}` }
-          })
-          const mine = Array.isArray(resMine.data?.data) ? resMine.data.data : []
-          list = mine
-        }
-
-        // 3) Normalisasi field agar tabel konsisten
+        // 2) Normalisasi field agar tabel konsisten
         this.files = (list || []).map(it => ({
           batch_id: it.batch_id ?? it.id ?? it.batchId,
           filename: it.filename ?? it.file_name ?? 'unknown.csv',
           user_name: it.user_name ?? it.user?.name ?? 'Unknown',
           created_at: it.created_at ?? it.uploaded_at ?? new Date().toISOString(),
-          status: it.status ?? 'pending',
+          status: it.status ?? 'approved',
           total_rows: it.total_rows ?? it.rows ?? null,
         }))
       } catch (e) {
