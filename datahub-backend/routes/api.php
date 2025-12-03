@@ -9,18 +9,17 @@ use App\Http\Controllers\DataController;
 
 // Rute Publik
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/datacore/mahasiswa', [DataController::class, 'dataMahasiswa']);
-Route::get('/datacore/akademik', [DataController::class, 'dataAkademik']);
 
 // Rute Terproteksi (Harus Login)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user(); });
-    // // DATACORE
-    // Route::middleware('role:datacore')->group(function () {
-       
-    // });
+    // DATACORE
+    Route::middleware('role:datacore')->group(function () {
+        Route::get('/datacore/mahasiswa', [DataController::class, 'dataMahasiswa']);
+        Route::get('/datacore/akademik', [DataController::class, 'dataAkademik']);
+    });
     // PARTICIPANT
     Route::middleware('role:participant')->group(function () {
         Route::post('/import-data', [ParticipantController::class, 'store']);
