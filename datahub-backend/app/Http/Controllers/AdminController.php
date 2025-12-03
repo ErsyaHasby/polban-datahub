@@ -189,16 +189,30 @@ class AdminController extends Controller
     }
 
     //memfilter data sesuai status approved dan per bacth id
-    public function getApprovedBatches()
+    public function getApprovedBatches(Request $request)
     {
+        $search = $request->get('search', '');
+        
         // Ambil batch_id unik yang sudah di-approve dengan informasi lengkap
-        $approvedBatches = ImportMahasiswa::with('user')
+        $query = ImportMahasiswa::with('user')
             ->select('batch_id')
             ->selectRaw("MAX(filename) as filename")
             ->selectRaw("MAX(created_at) as created_at")
             ->selectRaw("MAX(user_id) as user_id")
             ->selectRaw("COUNT(*) as total_rows")
-            ->where('status', 'approved')
+            ->where('status', 'approved');
+
+        // Tambahkan filter search jika ada
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('filename', 'ILIKE', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'ILIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        $approvedBatches = $query
             ->groupBy('batch_id')
             ->orderBy('created_at', 'desc')
             ->get()
