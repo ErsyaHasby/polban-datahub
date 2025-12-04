@@ -22,7 +22,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     // PARTICIPANT
     Route::middleware('role:participant')->group(function () {
-        Route::post('/import-data', [ParticipantController::class, 'store']);
+        //Route::post('/import-data', [ParticipantController::class, 'store']);
+        Route::post('/participant/upload', [ParticipantController::class, 'store']);
         Route::get('/my-uploads', [ParticipantController::class, 'myUploads']);
     });
     // ADMIN
