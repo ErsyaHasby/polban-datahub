@@ -29,9 +29,10 @@ return new class extends Migration
                 ->restrictOnDelete();
 
             // ENUM nilai
-            $table->rawColumn('nilai_huruf', 'nilai_huruf_enum');
+            $table->rawColumn('nilai_huruf', 'nilai_huruf_enum')->nullable();
 
-            $table->unique(['mahasiswa_id', 'kode_mk', 'periode_id'], 'unique_nilai_per_periode');//tambahan
+
+            $table->unique(['mahasiswa_id', 'kode_mk', 'periode_id'], 'unique_nilai_per_periode');
         });
     }
 

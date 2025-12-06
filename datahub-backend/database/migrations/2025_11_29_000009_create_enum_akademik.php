@@ -15,7 +15,7 @@ return new class extends Migration
         DB::statement("DROP TYPE IF EXISTS nilai_huruf_enum");
         DB::statement("
             CREATE TYPE nilai_huruf_enum AS ENUM
-            ('A', 'AB', 'B', 'BC', 'C', 'CD', 'D')
+            ('A', 'AB', 'B', 'BC', 'C', 'CD', 'D', 'E', 'T')
         ");
     }
 };

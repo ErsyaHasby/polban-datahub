@@ -25,7 +25,7 @@ return new class extends Migration
             $table->decimal('ip_semester', 3, 2)->nullable();
             $table->decimal('ipk', 3, 2);
 
-            $table->unique(['mahasiswa_id', 'periode_id']);//tambahan
+            $table->unique(['mahasiswa_id', 'periode_id']);
         });
     }
 

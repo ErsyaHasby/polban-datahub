@@ -15,7 +15,7 @@ return new class extends Migration
             // ENUM semester_enum
             $table->rawColumn('semester', 'semester_enum');
 
-            $table->unique(['tahun_ajaran', 'semester']);//tambahan
+            $table->unique(['tahun_ajaran', 'semester']);
         });
     }
 
