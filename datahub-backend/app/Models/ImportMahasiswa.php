@@ -11,8 +11,8 @@ class ImportMahasiswa extends Model
     
     protected $fillable = [
         'user_id',
-        'batch_id',     
-        'filename',   
+        'batch_id',
+        'filename',
         'status',
         'kelas',
         'angkatan',
@@ -25,7 +25,7 @@ class ImportMahasiswa extends Model
         'nama_wilayah_raw',
         'provinsi_raw',
         'admin_notes',
-        'created_at',   
+        'created_at',
         'updated_at'
     ];
 

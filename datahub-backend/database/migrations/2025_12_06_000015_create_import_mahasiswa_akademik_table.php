@@ -22,11 +22,34 @@ return new class extends Migration
                 ->default('pending')
                 ->index();
 
+            // DATA MAHASISWA AKADEMIK
+            $table->bigInteger('mahasiswa_id')->nullable();
             $table->integer('angkatan')->nullable();
 
+            // DATA PERIODE
+            $table->integer('tahun_ajaran')->nullable();
+            $table->rawColumn('semester', 'semester_enum')->nullable();
+
+            // DATA MATA KULIAH
+            $table->string('kode_mk', 8)->nullable();
+            $table->string('nama_mk', 127)->nullable();
+            $table->integer('sks')->nullable();
+
+            // DATA NILAI
+            $table->rawColumn('nilai_huruf', 'nilai_huruf_enum')->nullable();
+
+            // DATA IP
+            $table->decimal('ip_semester', 3, 2)->nullable();
+            $table->decimal('ipk', 3, 2)->nullable();
+
             $table->text('admin_notes')->nullable();
+            $table->text('error_message')->nullable();
 
             $table->timestamps();
+
+            // Index untuk query performa
+            $table->index(['batch_id', 'status']);
+            $table->index(['mahasiswa_id', 'tahun_ajaran', 'semester']);
         });
     }
 
