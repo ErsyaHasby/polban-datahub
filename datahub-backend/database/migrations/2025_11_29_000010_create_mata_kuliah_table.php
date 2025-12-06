@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('mata_kuliah', function (Blueprint $table) {
             $table->string('kode_mk', 8)->primary();
-            $table->string('nama_mk', 50);
+            $table->string('nama_mk', 127);
             $table->integer('sks');
         });
     }
