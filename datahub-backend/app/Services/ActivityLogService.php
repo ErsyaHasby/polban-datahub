@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ActivityLogService
 {
@@ -13,9 +12,9 @@ class ActivityLogService
      */
     public function log(string $action, string $description, int $userId, Request $request): ActivityLog
     {
-       return ActivityLog::create([
+        return ActivityLog::create([
             'user_id' => $userId,
-            'action' => DB::raw("'$action'"),
+            'action' => $action,
             'description' => $description,
             'ip_address' => $request->ip(),
         ]);

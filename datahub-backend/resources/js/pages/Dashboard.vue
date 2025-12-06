@@ -1,44 +1,34 @@
 <template>
   <div class="dashboard-layout">
-    
-    <Navbar 
-      :user="authStore.user" 
-      @logout="logout" 
-      @toggle-sidebar="toggleSidebar" 
-    />
-
+    <Navbar :user="authStore.user" @logout="logout" @toggle-sidebar="toggleSidebar" />
     <div class="main-wrapper">
-      
       <Sidebar 
-        :isAdmin="authStore.isAdmin"
-        :isParticipant="authStore.isParticipant"
+        :isAdmin="authStore.isAdmin" :isParticipant="authStore.isParticipant" 
         :isOpen="isSidebarOpen"
-        @openImport="showImportModal = true"
-        @openExport="showExportModal = true"
       />
-
       <main class="page-content" :class="{ 'full-width': !isSidebarOpen }">
         <div class="content-container">
-          
           <div class="welcome-header">
-            <h1>Selamat Datang, <span class="highlight-name">{{ authStore.user?.name }}!</span></h1>
-            <p v-if="authStore.isAdmin">Kelola data import dan monitor aktivitas sistem di sini.</p>
-            <p v-else>Import dan export data mahasiswa dengan mudah.</p>
+            <h1 class="page-title">Selamat Datang, <span class="highlight-name">{{ authStore.user?.name }}</span></h1>
+            <p class="page-subtitle" v-if="authStore.isAdmin">Anda login sebagai <strong>Admin</strong>.</p>
+            <p class="page-subtitle" v-else>Selamat datang di dashboard participant.</p>
           </div>
 
           <div class="content-body">
              </div>
-
         </div>
-
         <Footer />
       </main>
-
     </div>
-
     <ImportModal v-if="showImportModal" @close="showImportModal = false" />
-    <ExportModal v-if="showExportModal" @close="showExportModal = false" />
-  
+    <CustomModal v-if="showLogoutModal" @close="showLogoutModal = false">
+      <template #header>Konfirmasi Logout</template>
+      <div>Yakin ingin logout?</div>
+      <template #footer>
+        <button @click="showLogoutModal = false" class="btn-secondary">Batal</button>
+        <button @click="doLogout" class="btn-danger">Logout</button>
+      </template>
+    </CustomModal>
   </div>
 </template>
 
@@ -49,36 +39,32 @@ import Sidebar from '../components/Sidebar.vue'
 import Footer from '../components/Footer.vue'
 import ImportModal from '../components/ImportModal.vue'
 import ExportModal from '../components/ExportModal.vue'
+import CustomModal from '../components/CustomModal.vue'
 
 export default {
   name: 'Dashboard',
-  components: {
-    Navbar,
-    Sidebar,
-    Footer,
-    ImportModal,
-    ExportModal
-  },
+  components: { Navbar, Sidebar, Footer, ImportModal, ExportModal, CustomModal },
+  setup() { return { authStore: useAuthStore() } },
   data() {
     return {
+      // 1. LOGIC PENTING: Baca status dari localStorage agar sidebar tidak berubah sendiri
+      isSidebarOpen: localStorage.getItem('sidebarState') === 'closed' ? false : true,
+      
       showImportModal: false,
       showExportModal: false,
-      isSidebarOpen: true 
+      showLogoutModal: false
     }
   },
-  setup() {
-    const authStore = useAuthStore()
-    return { authStore }
-  },
   methods: {
-    async logout() {
-      if (confirm('Yakin ingin logout?')) {
-        await this.authStore.logout()
-        this.$router.push({ name: 'login' })
-      }
-    },
+    // 2. Toggle hanya mengubah status dan menyimpannya
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;
+      localStorage.setItem('sidebarState', this.isSidebarOpen ? 'open' : 'closed');
+    },
+    async logout() { this.showLogoutModal = true; },
+    async doLogout() {
+      await this.authStore.logout()
+      this.$router.push({ name: 'login' })
     }
   }
 }
@@ -90,57 +76,58 @@ export default {
 .dashboard-layout {
   font-family: 'Inria Sans', sans-serif;
   min-height: 100vh;
-  background-color: #f8fafc; 
+  background-color: #f8fafc;
+  display: flex; flex-direction: column;
 }
 
 .main-wrapper {
   display: flex;
-  padding-top: 90px; /* Disesuaikan dengan tinggi Navbar baru (90px) */
+  flex: 1;
+  padding-top: 90px;
+  min-height: 100vh;
 }
 
+/* KONTEN KANAN */
 .page-content {
   flex: 1; 
+  /* Margin saat sidebar TERBUKA */
   margin-left: 280px; 
+  
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 90px);
   transition: margin-left 0.3s ease-in-out; 
 }
 
+/* Margin saat sidebar TERTUTUP (MINI) */
+/* INI PENTING: 90px agar tidak tertutup sidebar mini */
 .page-content.full-width {
-  margin-left: 0;
+  margin-left: 90px; 
 }
 
 .content-container {
-  /* REVISI PADDING: */
-  /* padding-top dikurangi jadi 1rem agar teks naik mendekati navbar */
-  /* padding kiri-kanan tetap 4rem agar sejajar dengan navbar */
-  padding: 1rem 4rem 3rem 4rem; 
+  padding: 2rem 4rem; 
   flex: 1; 
-  background: white; 
+  background: var(--bg);
 }
 
-.welcome-header {
-  margin-top: 0; 
-  margin-bottom: 1rem;
-}
-
+.welcome-header { margin-bottom: 2rem; }
 .welcome-header h1 {
-  color: #1B2376;
-  font-size: 3.5rem; 
+  color: #1B2376; /* BIRU untuk mode terang */
+  font-size: 3rem;
   font-weight: 700;
-  margin-bottom: 0rem;
-  line-height: 1.2;
+  margin-bottom: 0.5rem;
 }
+.highlight-name { color: #F6983E; }
+.page-subtitle { color: #64748b; font-size: 1.2rem; margin-top: 0.5rem; }
 
-.highlight-name {
-  color: #F6983E; 
+/* Mode gelap override */
+.dark-theme .welcome-header h1,
+.dark-theme .page-title,
+.dark-theme .highlight-name {
+  color: var(--text);
 }
-
-.welcome-header p {
-  color: #64748b;
-  font-size: 1.3rem; 
-  font-weight: 300;
-  margin-top: 0.5rem;
+.dark-theme .page-subtitle {
+  color: var(--muted);
 }
 </style>

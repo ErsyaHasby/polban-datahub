@@ -41,12 +41,18 @@ export default { name: 'Footer' }
 <style scoped>
 .main-footer {
   font-family: 'Inria Sans', sans-serif;
-  background-color: #1B2376;
+  background-color: #1B2376; /* KEMBALIKAN BIRU UNTUK TERANG */
   color: white;
   /* REVISI: Padding diperkecil agar tidak menghabiskan tempat */
   padding: 1.5rem 3rem; 
   margin-top: auto; 
   font-size: 0.9rem; /* Font diperkecil */
+}
+
+/* Mode gelap: override dengan variabel */
+.dark-theme .main-footer {
+  background-color: var(--surface);
+  color: var(--text);
 }
 
 .footer-content {
@@ -94,7 +100,7 @@ export default { name: 'Footer' }
   font-size: 1rem;
   margin-bottom: 0.8rem;
   font-weight: 700;
-  color: #FF914D; /* Aksen Oranye */
+  color: #FF914D; /* Aksen Oranye tetap */
 }
 
 .footer-col ul { list-style: none; padding: 0; margin: 0; }

@@ -21,7 +21,7 @@ class NilaiMahasiswa extends Model
     // Relasi ke mahasiswa
     public function mahasiswa()
     {
-        return $this->belongsTo(Mahasiswa::class, 'mahasiswa_id', 'mahasiswa_id');
+        return $this->belongsTo(MahasiswaNilai::class, 'mahasiswa_id', 'mahasiswa_id');
     }
 
     // Relasi ke mata kuliah

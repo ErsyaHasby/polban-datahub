@@ -13,7 +13,7 @@ return new class extends Migration
 
             // FK mahasiswa
             $table->foreignId('mahasiswa_id')
-                ->constrained('mahasiswa', 'mahasiswa_id')
+                ->constrained('mahasiswa_akademik', 'mahasiswa_id')
                 ->restrictOnDelete();
 
             // FK mata kuliah (string PK)
@@ -29,7 +29,10 @@ return new class extends Migration
                 ->restrictOnDelete();
 
             // ENUM nilai
-            $table->rawColumn('nilai_huruf', 'nilai_huruf_enum');
+            $table->rawColumn('nilai_huruf', 'nilai_huruf_enum')->nullable();
+
+
+            $table->unique(['mahasiswa_id', 'kode_mk', 'periode_id'], 'unique_nilai_per_periode');
         });
     }
 
