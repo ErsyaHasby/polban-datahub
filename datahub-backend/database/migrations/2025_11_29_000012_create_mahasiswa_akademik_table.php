@@ -10,7 +10,27 @@ return new class extends Migration
     {
         Schema::create('mahasiswa_akademik', function (Blueprint $table) {
             $table->bigIncrements('mahasiswa_id'); // PK
-            $table->integer('angkatan'); // wajib diisi
+
+            // FK TRACKING WAJIB
+            $table->foreignId('import_akademik_id')
+                ->nullable()
+                ->constrained('import_mahasiswa_akademik', 'import_akademik_id')
+                ->nullOnDelete();
+
+            $table->foreignId('user_id_importer')
+                ->nullable()
+                ->constrained('users', 'user_id')
+                ->nullOnDelete();
+
+            $table->foreignId('user_id_approver')
+                ->nullable()
+                ->constrained('users', 'user_id')
+                ->nullOnDelete();
+
+            // DATA AKADEMIK
+            $table->integer('angkatan');
+            
+            $table->timestamps();
         });
     }
 
