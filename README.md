@@ -2,7 +2,7 @@
 
 [![Typing SVG](https://readme-typing-svg.herokuapp.com?font=Montserrat&weight=600&size=32&duration=3000&pause=2000&color=FFFFFF&center=true&vCenter=true&width=435&lines=Polban+DataHub)](https://git.io/typing-svg)
 
-<img src="datahub-backend/public/images/polban-logo.png" alt="Polban DataHub Logo" width="120" />
+<img src="datahub-backend/public/images/logo.png" alt="Polban DataHub Logo" width="120" />
 
 *Platform Manajemen Data Terpusat Prodi D3 Teknik Informatika*
 
@@ -877,16 +877,16 @@ Fitur import massal data dari Excel dengan validasi
       <sub><br>241511072</br></sub>
     </td>
     <td align="center">
-      <a href="https://github.com/contributor2">
-        <img src="https://github.com/github.png" width="100px;" alt="Alda"/><br />
+      <a href="https://github.com/Arud4Alda">
+        <img src="https://github.com/Arud4Alda.png" width="100px;" alt="Alda"/><br />
         <sub><b>Alda Pujama</b></sub>
       </a><br />
       <sub>Backend Engineer</sub>
       <sub><br>241511066</br></sub>
     </td>
     <td align="center">
-      <a href="https://github.com/contributor3">
-        <img src="https://github.com/github.png" width="100px;" alt="Raihan"/><br />
+      <a href="https://github.com/hanzz78">
+        <img src="https://github.com/hanzz78.png" width="100px;" alt="Raihan"/><br />
         <sub><b>Muhammad Raihan Abubakar</b></sub>
       </a><br />
       <sub>Backend Engineer</sub>
@@ -895,16 +895,16 @@ Fitur import massal data dari Excel dengan validasi
   </tr>
   <tr>
     <td align="center">
-      <a href="https://github.com/contributor4">
-        <img src="https://github.com/github.png" width="100px;" alt="Alexandrio"/><br />
+      <a href="https://github.com/AlexandrioVega">
+        <img src="https://github.com/AlexandrioVega.png" width="100px;" alt="Alexandrio"/><br />
         <sub><b>Alexandrio Vega Bonito</b></sub>
       </a><br />
       <sub>Database Engineer</sub>
       <sub><br>241511067</br></sub>
     </td>
     <td align="center">
-      <a href="https://github.com/contributor5">
-        <img src="https://github.com/github.png" width="100px;" alt="Gema"/><br />
+      <a href="https://github.com/Gema1407">
+        <img src="https://github.com/Gema1407.png" width="100px;" alt="Gema"/><br />
         <sub><b>Gema Adzan Firdaus</b></sub>
       </a><br />
       <sub>Database Engineer</sub>
