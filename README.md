@@ -822,16 +822,21 @@ Butuh bantuan? Hubungi kami melalui:
 <div align="center">
 
 ### 🏠 Admin Dashboard
-![Admin Dashboard](docs/screenshots/admin-dashboard.png)
+![Admin Dashboard](datahub-backend/public/images/admin-dashboard.png)
 Dashboard admin untuk mengelola seluruh data sistem
 
-### 📊 Data Management
-![Data Management](docs/screenshots/data-management.png)
-Interface untuk CRUD data mahasiswa dan akademik
+### 📊 Data Management / Review
+![Admin Review Data](datahub-backend/public/images/admin-review.png)
+Interface untuk CRUD data mahasiswa dan halaman review import oleh admin
 
-### 📥 Import Excel
-![Import Excel](docs/screenshots/import-excel.png)
-Fitur import massal data dari Excel dengan validasi
+### 📥 Import Data (Participant)
+![Import Excel](datahub-backend/public/images/import-participant.png)
+Fitur import massal data dari Excel oleh participant dengan preview dan validasi
+
+Keterangan:
+- **SS1**: Dashboard Admin — tampilan utama admin.
+- **SS2**: Halaman Review Data Admin — preview batch import dan opsi approve/reject.
+- **SS3**: Halaman Import Data Participant — upload file, preview, dan status batch.
 
 </div>
 
